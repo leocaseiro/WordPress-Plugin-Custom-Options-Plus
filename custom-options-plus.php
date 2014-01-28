@@ -5,7 +5,7 @@ Plugin URI: http://leocaseiro.com.br/custom-options-plus
 Description: With this plugin, you can enter your custom options datas. It is very easy to install and use. Even if you do not have expertise in PHP.
 You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
 You can also enter the login of your social networks. How to login twitter, Facebook, Youtube, contact email and more.
-Version: 1.0
+Version: 1.1
 Author: Leo Caseiro
 Author URI: http://leocaseiro.com.br/
 */
@@ -71,7 +71,7 @@ function cop_insert() {
 		array( 
 			'label' => $_POST['label'], 
 			'name' => $_POST['name'],
-			'value' => $_POST['value']
+			'value' => stripslashes($_POST['value'])
 		)
 	);
 }
@@ -84,12 +84,13 @@ function cop_update() {
 	$_POST['name'] 	= filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS);
 	$_POST['value'] = filter_var($_POST['value'], FILTER_UNSAFE_RAW);
 	
+	
 	return $wpdb->update(
 		COP_TABLE, 
 		array( 
 			'label' => $_POST['label'], 
 			'name' 	=> $_POST['name'],
-			'value' => $_POST['value']
+			'value' => stripslashes($_POST['value'])
 		),
 		array ('id' => $_POST['id'])
 	);
@@ -114,10 +115,14 @@ function cop_get_option( $id ) {
 	return $wpdb->get_row('SELECT * FROM ' . COP_TABLE . ' WHERE id = ' . $id );
 }
 
+
+
+
+
 //Panel Admin
 function custom_options_plus_adm() {
 	global $wpdb, $my_plugin_hook;
-
+	
 	$id 	= '';
 	$label 	= '';
 	$name 	= '';
@@ -165,24 +170,39 @@ function custom_options_plus_adm() {
 		<br />
 		<?php if ( count($options) > 0 ) : ?>
 			<div class="wpbody-content">
-				<table class="widefat" cellspacing="0">
+				<table class="wp-list-table widefat" cellspacing="0">
 					<thead>
 						<tr>
-							<th>Label</th>
-							<th>Name</th>
-							<th>Value</th>
-							<th> </th>
+							<th scope="col" class="manage-column column-title">Label</th>
+							<th scope="col" class="manage-column column-title">Name</th>
+							<th scope="col" class="manage-column column-title">Value</th>
 						</tr>
 					</thead>
-					<tbody>
-						<?php foreach ($options as $option ) : ?>
+                    <tfoot>
 						<tr>
-							<td><a title="Edit <?php echo $option->label; ?>" href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&id=<?php echo $option->id; ?>"><?php echo $option->label; ?></a></td>
-							<td><a title="Edit <?php echo $option->label; ?>" href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&id=<?php echo $option->id; ?>"><?php echo $option->name; ?></a></td>
-							<td><a title="Edit <?php echo $option->label; ?>" href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&id=<?php echo $option->id; ?>"><?php echo $option->value; ?></a></td>
-							<td><span class="trash"><a onclick="return confirm('Are you sure want to delete item?')" class="submitdelete" title="Delete <?php echo $option->label; ?>" href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&del=<?php echo $option->id; ?>">Delete</a></span></td>
+							<th scope="col" class="manage-column column-title">Label</th>
+							<th scope="col" class="manage-column column-title">Name</th>
+							<th scope="col" class="manage-column column-title">Value</th>
 						</tr>
-						<?php endforeach; ?>
+					</tfoot>
+					<tbody id="the-list">
+						<?php $trclass = 'class="alternate"';
+						foreach ($options as $option ) : 
+						?>
+						<tr <?php echo $trclass; ?>>
+							<td>
+                            	<?php echo $option->label; ?>
+                                <div class="row-actions">
+                                	<span class="edit"><a href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&id=<?php echo $option->id; ?>">Edit</a> | </span>
+                                    <span class="delete"><a onclick="return confirm('Are you sure want to delete item?')" class="submitdelete" title="Delete <?php echo $option->label; ?>" href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&del=<?php echo $option->id; ?>">Delete</a></span>
+                                </div>
+                            </td>
+                            <td><code><?php echo $option->name; ?></code></td>
+							<td><?php echo htmlentities($option->value); ?></td>
+						</tr>
+						<?php
+						$trclass = $trclass == 'class="alternate"' ? '' : 'class="alternate"';
+						endforeach; ?>
 					</tbody>
 				</table>
 			</div>
