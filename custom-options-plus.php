@@ -42,7 +42,7 @@ function cop_setup() {
 		  `id` int(5) NOT NULL AUTO_INCREMENT,
 		  `label` varchar(100) NOT NULL,
 		  `name` varchar(80) NOT NULL,
-		  `value` varchar(255) NOT NULL,
+		  `value` text NOT NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 	' );
@@ -257,7 +257,7 @@ function get_custom( $name ) {
 	else :
 		return false;
 	endif;
-}
+} 
 
 //get your array options
 function get_customs( $name ) {

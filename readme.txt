@@ -3,8 +3,8 @@ Contributors: leocaseiro
 Donate link: http://leocaseiro.com.br/contato/
 Tags: configs, custom, custom configs, custom options, custom options plus, custom settings, leocaseiro, options, settings, wp_options
 Requires at least: 2.7
-Tested up to: 3.2.1
-Stable tag: 1.0
+Tested up to: 3.4
+Stable tag: 1.1
 
 == Description == 
 With this plugin, you can enter your custom options datas. It is very easy to install and use. Even if you do not have expertise in PHP.
