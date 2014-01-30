@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Custom Options Plus
-Plugin URI: http://leocaseiro.com.br/custom-options-plus
+Plugin URI: https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus
 Description: With this plugin, you can enter your custom options datas. It is very easy to install and use. Even if you do not have expertise in PHP.
 You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
 You can also enter the login of your social networks. How to login twitter, Facebook, Youtube, contact email and more.
-Version: 1.1
+Version: 1.2
 Author: Leo Caseiro
 Author URI: http://leocaseiro.com.br/
 */
@@ -164,7 +164,7 @@ function custom_options_plus_adm() {
 ?>
 	
 	<div class="wrap">
-		<div id="icon-tools" class="icon32"></div><h2>Custom Options Plus</h2>
+		<div id="icon-tools" class="icon32"></div><h2>Custom Options Plus <a href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>#new-custom-option" class="add-new-h2">Add New</a></h2>
 		
 		<?php echo $message; ?>
 		<br />
@@ -173,7 +173,7 @@ function custom_options_plus_adm() {
 				<table class="wp-list-table widefat" cellspacing="0">
 					<thead>
 						<tr>
-							<th scope="col" class="manage-column column-title">Label</th>
+							<th scope="col" class="manage-column " style="min-width: 100px">Label</th>
 							<th scope="col" class="manage-column column-title">Name</th>
 							<th scope="col" class="manage-column column-title">Value</th>
 						</tr>
@@ -193,12 +193,12 @@ function custom_options_plus_adm() {
 							<td>
                             	<?php echo $option->label; ?>
                                 <div class="row-actions">
-                                	<span class="edit"><a href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&id=<?php echo $option->id; ?>">Edit</a> | </span>
+                                	<span class="edit"><a href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&id=<?php echo $option->id; ?>#new-custom-option">Edit</a> | </span>
                                     <span class="delete"><a onclick="return confirm('Are you sure want to delete item?')" class="submitdelete" title="Delete <?php echo $option->label; ?>" href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&del=<?php echo $option->id; ?>">Delete</a></span>
                                 </div>
                             </td>
                             <td><code><?php echo $option->name; ?></code></td>
-							<td><?php echo htmlentities($option->value); ?></td>
+							<td><?php echo htmlentities(utf8_decode($option->value)); ?></td>
 						</tr>
 						<?php
 						$trclass = $trclass == 'class="alternate"' ? '' : 'class="alternate"';
@@ -211,7 +211,7 @@ function custom_options_plus_adm() {
 		
 		<form method="post" action="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>">
 			<input type="hidden" name="id" value="<?php echo $id; ?>" />
-			<h3>Add new Custom Option</h3>
+			<h3 id="new-custom-option">Add new Custom Option</h3>
 			<table class="form-table">				
 				<tbody>
 					<tr valign="top">
