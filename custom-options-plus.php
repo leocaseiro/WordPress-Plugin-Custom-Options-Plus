@@ -5,7 +5,7 @@ Plugin URI: https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus
 Description: With this plugin, you can enter your custom options datas. It is very easy to install and use. Even if you do not have expertise in PHP.
 You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
 You can also enter the login of your social networks. How to login twitter, Facebook, Youtube, contact email and more.
-Version: 1.2
+Version: 1.3
 Author: Leo Caseiro
 Author URI: http://leocaseiro.com.br/
 */
@@ -25,6 +25,12 @@ Author URI: http://leocaseiro.com.br/
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
+// Make sure we don't expose any info if called directly
+if ( !function_exists( 'add_action' ) ) {
+	echo 'Hi there!  I\'m just a plugin, not much I can do when called directly.';
+	exit;
+}
 
 define( 'COP_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 define( 'COP_PLUGIN_NAME', trim( dirname( COP_PLUGIN_BASENAME ), '/' ) );
@@ -58,6 +64,15 @@ function cop_add_menu() {
  	$my_plugin_hook = add_options_page('Custom Options Plus', 'Custom Options Plus', 'manage_options', 'custom_options_plus', 'custom_options_plus_adm');
 
 }
+
+function cop_load_js_and_css() {
+	wp_register_script( 'functions.js', COP_PLUGIN_DIR . 'functions.js', array('jquery'), '2.5.9' );
+	wp_register_script( 'jquery.stringToSlug.min.js', COP_PLUGIN_DIR . 'jquery.stringToSlug.min.js', array('jquery'), '2.5.9' );
+
+}
+
+
+
 
 function cop_insert() {
 	global $wpdb;
@@ -122,6 +137,10 @@ function cop_get_option( $id ) {
 //Panel Admin
 function custom_options_plus_adm() {
 	global $wpdb, $my_plugin_hook;
+
+	wp_enqueue_script( 'stringToSlug', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array('jquery'), '2.5.9' );
+	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array('stringToSlug') );
+	
 	
 	$id 	= '';
 	$label 	= '';
@@ -189,7 +208,7 @@ function custom_options_plus_adm() {
 						<?php $trclass = 'class="alternate"';
 						foreach ($options as $option ) : 
 						?>
-						<tr <?php echo $trclass; ?>>
+						<tr <?php echo $trclass; ?> rowspan="2">
 							<td>
                             	<?php echo $option->label; ?>
                                 <div class="row-actions">
@@ -197,7 +216,9 @@ function custom_options_plus_adm() {
                                     <span class="delete"><a onclick="return confirm('Are you sure want to delete item?')" class="submitdelete" title="Delete <?php echo $option->label; ?>" href="<?php echo preg_replace('/\\&.*/', '', $_SERVER['REQUEST_URI']); ?>&del=<?php echo $option->id; ?>">Delete</a></span>
                                 </div>
                             </td>
-                            <td><code><?php echo $option->name; ?></code></td>
+                            <td>
+                            	<input style="font-size:12px;" type="text" onfocus="this.select();" readonly="readonly" value="<?php echo $option->name; ?>" class="shortcode-in-list-table wp-ui-text-highlight code">
+                            </td>
 							<td><?php echo htmlentities(utf8_decode($option->value)); ?></td>
 						</tr>
 						<?php
