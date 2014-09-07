@@ -3,14 +3,21 @@ Contributors: leocaseiro
 Donate link: http://leocaseiro.com.br/contato/
 Tags: configs, custom, custom configs, custom options, custom options plus, custom settings, leocaseiro, options, settings, wp_options
 Requires at least: 2.7
-Tested up to: 3.8.1
-Stable tag: 1.3
+Tested up to: 4.0
+Stable tag: 1.4
 
 == Description == 
-	With this plugin, you can enter your custom options datas. It is very easy to install and use. Even if you do not have expertise in PHP.
-You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
-You can also enter the login of your social networks. How to login twitter, Facebook, Youtube, contact email and more.
-Based on Custom Settings (Custom Configs)
+	Custom Opstions Plus is the easiest way to add your custom variables as a Settings Page for your Theme.
+	
+	It's very useful for beginners or who doesn't want to create a settings page as a plugin.
+	If you are not a expertise in PHP, just follow the instructions following the FAQ tab.
+
+	You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
+	Also, you can use to enter a social network login, as twitter, facebook, Youtube, Instagram, and more.
+
+	This Plugin was Based on Custom Settings (Custom Configs) which has been removal from WordPress Repository.
+
+[Support on GitHub] (https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus/issues "GitHub Issues for Support"), please!
 
 == Installation == 
 1. Download the plugin.
@@ -43,7 +50,7 @@ Based on Custom Settings (Custom Configs)
 
 * Value field from varchar(255) to text
 
-* Correcting following suggestion by Andy Stratton in http://wordpress.org/support/topic/plugin-custom-options-plus-stripslashes-needed-on-submission-of-content?replies=1
+* SQL Injection fix following suggestion by Andy Stratton in http://wordpress.org/support/topic/plugin-custom-options-plus-stripslashes-needed-on-submission-of-content?replies=1
 
 * New Layout using WP List Table
 
@@ -58,3 +65,9 @@ Based on Custom Settings (Custom Configs)
 = 1.3 =
 
 * Add automatic name genrated from Label using jQuery stingToSlug Plugin
+
+= 1.4 =
+
+* Update stringToSlug Plugin
+* Tested up to WordPress 4.0
+* Add Plugin Icon for WordPress 4.0

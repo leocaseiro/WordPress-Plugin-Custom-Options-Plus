@@ -5,12 +5,12 @@ Plugin URI: https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus
 Description: With this plugin, you can enter your custom options datas. It is very easy to install and use. Even if you do not have expertise in PHP.
 You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
 You can also enter the login of your social networks. How to login twitter, Facebook, Youtube, contact email and more.
-Version: 1.3
+Version: 1.4
 Author: Leo Caseiro
 Author URI: http://leocaseiro.com.br/
 */
 
-/*  Copyright 2011 Leo Caseiro (http://leocaseiro.com.br/)
+/*  Copyright 2011-2014 Leo Caseiro (http://leocaseiro.com.br/)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -302,7 +302,7 @@ function cop_plugin_help($contextual_help, $screen_id, $screen) {
 	global $my_plugin_hook;
 	if ($screen_id == $my_plugin_hook) {
 
-		$contextual_help = 'Used <em>get_custom(\'name\')</em> or <em>get_customs(\'name\')</em> in your theme.';
+		$contextual_help = '<br>Use <br /><em>' . htmlentities('<?php echo get_custom(\'name\') ; ?>') . '</em><br /><br /> or <br><em>' . htmlentities('<?php foreach ( get_customs(\'name\') as $name ) : ') . '<br />    echo $name; <br /> ' . htmlentities('endforeach; ?>') . '</em> <br /> in your theme.';
 	}
 	return $contextual_help;
 }
