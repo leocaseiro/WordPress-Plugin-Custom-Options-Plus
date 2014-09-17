@@ -4,7 +4,7 @@ Donate link: http://leocaseiro.com.br/contato/
 Tags: configs, custom, custom configs, custom options, custom options plus, custom settings, leocaseiro, options, settings, wp_options
 Requires at least: 2.7
 Tested up to: 4.0
-Stable tag: 1.4.1
+Stable tag: 1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
