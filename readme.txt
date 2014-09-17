@@ -1,4 +1,4 @@
-=== Custom Options Plus === 
+=== Custom Options Plus ===
 Contributors: leocaseiro
 Donate link: http://leocaseiro.com.br/contato/
 Tags: configs, custom, custom configs, custom options, custom options plus, custom settings, leocaseiro, options, settings, wp_options
@@ -9,7 +9,7 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-== Description == 
+== Description ==
 Custom Options Plus is the easiest way to add your custom variables as a Settings Page for your Theme.
 
 It's very useful for beginners or who doesn't want to create a settings page as a plugin.
@@ -22,7 +22,7 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 
 [Support on GitHub](https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus/issues "GitHub Issues for Support"), please!
 
-== Installation == 
+== Installation ==
 1. Download the plugin.
 2. Activate the plugin.
 3. Configure the administration panel in Settings > Custom Options Plus and customize your options plus
@@ -45,6 +45,19 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 
 == Changelog ==
 
+= 1.5 =
+
+* Lot of best practices improvements on code
+* ESCAPE bug fix following suggestion from @pierre-r on github Issue #4
+* SQL Injection improvement using correctly $wpdp->prepare
+* Plugin Version added
+* Admin Layout improvements
+* Automatic name generated only on Add New mode
+
+= 1.4.1 =
+
+* README improvements
+
 = 1.4 =
 
 * Update stringToSlug Plugin
@@ -53,7 +66,7 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 
 = 1.1 =
 * Value field from varchar(255) to text
-* SQL Injection fix following suggestion by Andy Stratton in http://wordpress.org/support/topic/plugin-custom-options-plus-stripslashes-needed-on-submission-of-content?replies=1
+* SQL Injection fix following suggestion from Andy Stratton in http://wordpress.org/support/topic/plugin-custom-options-plus-stripslashes-needed-on-submission-of-content?replies=1
 * New Layout using WP List Table
 
 
