@@ -52,6 +52,7 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 * SQL Injection improvement using correctly $wpdp->prepare
 * Plugin Version added
 * Admin Layout improvements
+* Automatic name generated only on Add New mode
 
 = 1.4.1 =
 
