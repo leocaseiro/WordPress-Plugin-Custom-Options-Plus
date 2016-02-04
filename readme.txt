@@ -3,8 +3,8 @@ Contributors: leocaseiro
 Donate link: http://leocaseiro.com.br/contato/
 Tags: configs, custom, custom configs, custom options, custom options plus, custom settings, leocaseiro, options, settings, wp_options
 Requires at least: 2.7
-Tested up to: 4.2
-Stable tag: 1.5
+Tested up to: 4.4.2
+Stable tag: 1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,10 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 
 == Changelog ==
 
+= 1.6 =
+
+* Set all fields as required [Fix Issue #6](https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus/issues/6)
+
 = 1.5 =
 
 * Lot of best practices improvements on code
@@ -66,7 +70,7 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 
 = 1.1 =
 * Value field from varchar(255) to text
-* SQL Injection fix following suggestion from Andy Stratton in http://wordpress.org/support/topic/plugin-custom-options-plus-stripslashes-needed-on-submission-of-content?replies=1
+* [SQL Injection fix following suggestion from Andy Stratton](http://wordpress.org/support/topic/plugin-custom-options-plus-stripslashes-needed-on-submission-of-content?replies=1)
 * New Layout using WP List Table
 
 
