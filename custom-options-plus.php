@@ -40,7 +40,7 @@ define( 'COP_PLUGIN_URL', WP_PLUGIN_URL . '/' . COP_PLUGIN_NAME );
 
 //Added on 1.5
 define( 'COP_OPTIONS_PREFIX', 'cop_' );
-define( 'COP_PLUGIN_VERSION', '1.5' );
+define( 'COP_PLUGIN_VERSION', '1.6' );
 
 global $wpdb, $COP_TABLE;
 define( 'COP_TABLE',  $wpdb->prefix . 'custom_options_plus' );
