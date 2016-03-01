@@ -1,6 +1,8 @@
 WordPress Custom Options Plus Plugin
 =============
-WordPress Custom Options Plus is the easiest way to add your custom variables as a Settings Page for your Theme.
+[![WordPress plugin](https://img.shields.io/wordpress/plugin/v/custom-options-plus.svg)](https://wordpress.org/plugins/custom-options-plus/) [![WordPress](https://img.shields.io/wordpress/plugin/dt/custom-options-plus.svg)](https://wordpress.org/plugins/custom-options-plus/) [![WordPress](https://img.shields.io/wordpress/v/custom-options-plus.svg)](https://wordpress.org/plugins/custom-options-plus/) [![WordPress rating](https://img.shields.io/wordpress/plugin/r/custom-options-plus.svg)](https://wordpress.org/plugins/custom-options-plus/)
+
+[WordPress Custom Options Plus](https://wordpress.org/plugins/custom-options-plus/) is the easiest way to add your custom variables as a Settings Page for your Theme.
 It works similar to wp_options, but you don' need to create your own forms.
 
 PS: It uses an extra table on your MySQL
