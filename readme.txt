@@ -30,19 +30,19 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 
 == Frequently Asked Questions ==
 = Used to single option =
-```php
+`
 <?php echo get_custom('name'); ?>
-```
+`
 
 = Used to multiples options =
-```php
+`
 <?php
 	$array = get_customs('array_name');
 	foreach ($array as $name) :
 		echo $name;
 	endforeach;
 ?>
-```
+`
 
 
 == Changelog ==
