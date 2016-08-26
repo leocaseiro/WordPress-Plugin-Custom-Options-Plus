@@ -154,6 +154,7 @@ function custom_options_plus_adm() {
 	wp_enqueue_script( 'stringToSlug', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array('jquery'), '2.5.9' );
 	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array('stringToSlug') );
 	wp_enqueue_script( 'importExport', COP_PLUGIN_URL . '/js/import-export.js', array('jquery'), '2.5.9' );
+	wp_enqueue_style('copCss', COP_PLUGIN_URL . '/css/cop.css');
 
 	$id 	= '';
 	$label 	= '';
@@ -278,11 +279,16 @@ function custom_options_plus_adm() {
 		</form>
 
 		<p>
-			<button name id="cop-import" class="button-primary"><?php _e('Import'); ?></button>
+			<form action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
+				<input type="hidden" name="action" value="import">
+
+				<label for="cop-import">
+					<a href="#" class="button-primary fake-button"><?php _e('Import'); ?></a>
+				</label>
+				<input type="file" name="file_import" id="cop-import" class="button-primary hidden" value="<?php _e('Import'); ?>" />
+			</form>
 			<button name id="cop-export" class="button-primary"><?php _e('Export'); ?></button>
 		</p>
-
-
 
 	</div>
 <?php

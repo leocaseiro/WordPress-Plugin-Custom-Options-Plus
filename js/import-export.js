@@ -1,6 +1,13 @@
 var $ = jQuery;
 var importExport = {
 
+    fakeButton: function(){
+        $('.fake-button').click(function(){
+            $(this).parent().trigger('click');
+            return false;
+        });
+
+    },
     ajaxExport: function(){
 
         $.post(ajaxurl, {action: 'export'}, function(data){
@@ -13,13 +20,6 @@ var importExport = {
         });
     },
 
-    ajaxImport: function(){
-
-        $.post(ajaxurl, {action: 'import'}, function(data){
-
-        });
-    },
-
     clickExport: function(){
         var that = this;
         $('#cop-export').click(function(){
@@ -27,16 +27,9 @@ var importExport = {
         });
     },
 
-    clickImport: function(){
-        var that = this;
-        $('#cop-import').click(function(){
-            that.ajaxExport();
-        });
-    },
-
     init: function(){
-        this.clickImport();
         this.clickExport();
+        this.fakeButton();
     }
 };
 
