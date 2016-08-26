@@ -153,7 +153,7 @@ function custom_options_plus_adm() {
 
 	wp_enqueue_script( 'stringToSlug', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array('jquery'), '2.5.9' );
 	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array('stringToSlug') );
-
+	wp_enqueue_script( 'importExport', COP_PLUGIN_URL . '/js/import-export.js', array('jquery'), '2.5.9' );
 
 	$id 	= '';
 	$label 	= '';
@@ -277,6 +277,13 @@ function custom_options_plus_adm() {
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button-primary" value="<?php _e('Save Changes'); ?>"></p>
 		</form>
 
+		<p>
+			<button name id="cop-import" class="button-primary"><?php _e('Import'); ?></button>
+			<button name id="cop-export" class="button-primary"><?php _e('Export'); ?></button>
+		</p>
+
+
+
 	</div>
 <?php
 }
@@ -322,3 +329,22 @@ function cop_plugin_help($contextual_help, $screen_id, $screen) {
 }
 
 add_filter('contextual_help', 'cop_plugin_help', 10, 3);
+
+//ajax import and export
+add_action( 'wp_ajax_export', 'export_data' );
+function export_data() {
+	global $wpdb, $COP_TABLE;
+
+	header('Content-type: application/json');
+
+	$result = $wpdb->get_results( "SELECT * FROM $COP_TABLE");
+
+	$data = [];
+
+	foreach($result as $row){
+		$data[] = $row;
+	}
+
+	echo json_encode($data, JSON_PRETTY_PRINT);
+	exit;
+}
