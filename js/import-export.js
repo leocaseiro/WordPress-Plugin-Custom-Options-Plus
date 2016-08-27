@@ -1,6 +1,50 @@
 var $ = jQuery;
 var importExport = {
 
+    importSubmit: function(){
+        $('#import-form').submit(function(e){
+
+            var formData = new FormData(this);
+            formData.append('action', 'import');
+
+            $.ajax({
+                url : ajaxurl,
+                type : 'POST',
+                data : formData,
+                processData: false,
+                contentType: false,
+                success : function(data) {
+                    if(!data.err){
+                        location.reload();
+                    }
+                }
+            });
+
+            return false;
+        });
+    },
+
+    fileImport: function(){
+        $('#cop-import').change(function(e){
+
+            var files = e.currentTarget.files;
+
+            if(files.length == 1 && files[0].type == 'application/json'){
+
+                var confirmImport = confirm('Are you sure do you want import this file? Current data will be overwriten!');
+
+                if(confirmImport){
+                    $('#import-form').submit();
+                }
+
+            }
+            else{
+                alert('Error on import file: not a json or more than a file uploaded!');
+            }
+
+        });
+    },
+
     fakeButton: function(){
         $('.fake-button').click(function(){
             $(this).parent().trigger('click');
@@ -30,6 +74,8 @@ var importExport = {
     init: function(){
         this.clickExport();
         this.fakeButton();
+        this.fileImport();
+        this.importSubmit();
     }
 };
 

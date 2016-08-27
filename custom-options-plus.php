@@ -87,19 +87,19 @@ function cop_load_js_and_css() {
 }
 
 
-function cop_insert() {
+function cop_insert($row) {
 	global $wpdb;
 
-	$_POST['label'] = stripslashes_deep(filter_var($_POST['label'], FILTER_SANITIZE_SPECIAL_CHARS));
-	$_POST['name'] 	= stripslashes_deep(filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS));
-	$_POST['value'] = stripslashes_deep(filter_var($_POST['value'], FILTER_UNSAFE_RAW));
+	$row['label'] = stripslashes_deep(filter_var($row['label'], FILTER_SANITIZE_SPECIAL_CHARS));
+	$row['name'] 	= stripslashes_deep(filter_var($row['name'], FILTER_SANITIZE_SPECIAL_CHARS));
+	$row['value'] = stripslashes_deep(filter_var($row['value'], FILTER_UNSAFE_RAW));
 
 	return $wpdb->insert(
 		COP_TABLE,
 		array(
-			'label' => $_POST['label'],
-			'name' => $_POST['name'],
-			'value' => stripslashes($_POST['value'])
+			'label' => $row['label'],
+			'name' => $row['name'],
+			'value' => stripslashes($row['value'])
 		),
 		array('%s','%s','%s')
 	);
@@ -156,6 +156,8 @@ function custom_options_plus_adm() {
 	wp_enqueue_script( 'importExport', COP_PLUGIN_URL . '/js/import-export.js', array('jquery'), '2.5.9' );
 	wp_enqueue_style('copCss', COP_PLUGIN_URL . '/css/cop.css');
 
+
+
 	$id 	= '';
 	$label 	= '';
 	$name 	= '';
@@ -172,7 +174,7 @@ function custom_options_plus_adm() {
 	elseif ( isset($_POST['id']) ) :
 
 		if ($_POST['id'] == '') :
-			cop_insert();
+			cop_insert($_POST);
 			$message = '<div class="updated"><p><strong>' . __('Settings saved.') . '</strong></p></div>';
 
 		elseif ($_POST['id'] > 0) :
@@ -279,7 +281,7 @@ function custom_options_plus_adm() {
 		</form>
 
 		<p>
-			<form action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
+			<form enctype="multipart/form-data" id="import-form" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
 				<input type="hidden" name="action" value="import">
 
 				<label for="cop-import">
@@ -352,5 +354,25 @@ function export_data() {
 	}
 
 	echo json_encode($data, JSON_PRETTY_PRINT);
+	exit;
+}
+
+
+add_action( 'wp_ajax_import', 'import_data' );
+function import_data() {
+	global $wpdb, $COP_TABLE;
+
+	$file_obj = $_FILES['file_import'];
+	$file_content = file_get_contents($file_obj['tmp_name']);
+	$file_data = json_decode($file_content, true);
+
+	$wpdb->query("TRUNCATE TABLE $COP_TABLE");
+
+	foreach($file_data as $row){
+		cop_insert($row);
+	}
+
+	echo json_encode(['err' => false]);
+
 	exit;
 }
