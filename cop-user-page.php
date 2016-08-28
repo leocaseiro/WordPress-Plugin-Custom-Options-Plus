@@ -4,7 +4,6 @@
 
     <?php
         $options = cop_get_options();
-        // var_dump($options);
         foreach($options as $option):
     ?>
 

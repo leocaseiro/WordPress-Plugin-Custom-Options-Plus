@@ -88,8 +88,7 @@ function cop_add_menu() {
  		$my_plugin_hook = add_options_page('Custom Options Plus', 'Custom Options Plus', 'manage_options', 'custom_options_plus', 'custom_options_plus_adm');
 	}
 
-
-	$menuName = 'Opções';
+	$menuName = __('Options', COP_PLUGIN_NAME);
 
 	add_menu_page( 'COP User Page', $menuName , 'manage_options', 'cop-user-page', 'cop_user_page');
 
@@ -318,6 +317,11 @@ function custom_options_plus_adm() {
 
 		</p>
 
+		<template id="cop-err-msg">
+			<p><?= __('Are you sure do you want import this file? Current data will be overwriten!', COP_PLUGIN_NAME); ?></p>
+			<p><?= __('Error on import file: not a json or more than a file uploaded!', COP_PLUGIN_NAME); ?></p>
+		</template>
+
 	</div>
 <?php
 }
@@ -408,6 +412,8 @@ add_action( 'wp_ajax_update', 'update_data' );
 function update_data() {
 	global $wpdb, $COP_TABLE;
 
+	header('Content-type: application/json');
+
 	$data = $_POST;
 	$action = array_pop($data);
 	$cop_data = array_pop($data);
@@ -427,6 +433,17 @@ function update_data() {
 		$i++;
 	}
 
-	echo json_encode(['err' => false ]);
+
+	echo json_encode(['err' => false, 'msg' => __('Options update successfully!', COP_PLUGIN_NAME) ]);
 	exit;
+}
+
+//i18n feature
+add_action( 'init', 'cop_load_textdomain' );
+
+function cop_load_textdomain() {
+
+	if(get_locale() == 'pt_BR'){
+		load_textdomain(COP_PLUGIN_NAME, COP_PLUGIN_DIR.'/languages/pt_BR.mo');
+	}
 }

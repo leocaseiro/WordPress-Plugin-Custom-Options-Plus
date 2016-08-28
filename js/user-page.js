@@ -25,7 +25,9 @@ var userPage = {
                 contentType: false,
                 success : function(data) {
                     if(!data.err){
-                        alert('Options update successfully!');
+
+                        console.log(data);
+                        alert(data.msg);
                         location.reload();
                     }
                 }

@@ -15,6 +15,7 @@ var importExport = {
                 contentType: false,
                 success : function(data) {
                     if(!data.err){
+                        alert(data.msg);
                         location.reload();
                     }
                 }
@@ -28,10 +29,13 @@ var importExport = {
         $('#cop-import').change(function(e){
 
             var files = e.currentTarget.files;
+            var $errTemplate = $( $('#cop-err-msg').html() );
 
             if(files.length == 1 && files[0].type == 'application/json'){
 
-                var confirmImport = confirm('Are you sure do you want import this file? Current data will be overwriten!');
+                var msg = $( $errTemplate[0] ).text();
+
+                var confirmImport = confirm(msg);
 
                 if(confirmImport){
                     $('#import-form').submit();
@@ -39,7 +43,8 @@ var importExport = {
 
             }
             else{
-                alert('Error on import file: not a json or more than a file uploaded!');
+                var msg = $( $errTemplate[2] ).text();
+                alert(msg);
             }
 
         });
