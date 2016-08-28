@@ -1,5 +1,6 @@
 {
   "name": "WordPress-Plugin-Custom-Options-Plus",
+  "version": "1.6.0",
   "homepage": "https://github.com/lucasbhjf/WordPress-Plugin-Custom-Options-Plus",
   "authors": [
     "leocaseiro <http://leocaseiro.com.br/>",
@@ -9,7 +10,7 @@
   "main": "custom-options-plus",
   "keywords": [
     "wordpress",
-    "plugin"
+    "plugin",
     "wp-plugin",
     "lucasbhjf",
     "leocaseiro",
