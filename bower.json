@@ -1,5 +1,5 @@
 {
-  "name": "WordPress-Plugin-Custom-Options-Plus",
+  "name": "wp-plugin-custom-options-plus",
   "version": "1.7",
   "homepage": "https://github.com/lucasbhjf/WordPress-Plugin-Custom-Options-Plus",
   "authors": [
@@ -8,7 +8,7 @@
   ],
   "description": "With Custom Options Plus WordPress Plugin, you can enter your custom options datas for your theme.",
   "main": "custom-options-plus",
-  "keywgitords": [
+  "keywgitords": [g
     "wordpress",
     "plugin",
     "wp-plugin",
