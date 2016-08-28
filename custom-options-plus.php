@@ -77,9 +77,30 @@ add_action('admin_menu', 'cop_add_menu');
 function cop_add_menu() {
 
  	global $my_plugin_hook;
- 	$my_plugin_hook = add_options_page('Custom Options Plus', 'Custom Options Plus', 'manage_options', 'custom_options_plus', 'custom_options_plus_adm');
+
+
+	add_action( 'admin_menu', 'my_plugin_menu' );
+	$logged_user = wp_get_current_user();
+	$main_user = get_user_by('id', 1);
+
+
+	if($logged_user->id == $main_user->ID){
+ 		$my_plugin_hook = add_options_page('Custom Options Plus', 'Custom Options Plus', 'manage_options', 'custom_options_plus', 'custom_options_plus_adm');
+	}
+
+
+	$menuName = 'Opções';
+
+	add_menu_page( 'COP User Page', $menuName , 'manage_options', 'cop-user-page', 'cop_user_page');
 
 }
+
+function cop_user_page(){
+	require(COP_PLUGIN_DIR.'/cop-user-page.php');
+	wp_enqueue_style('copCss', COP_PLUGIN_URL . '/css/cop.css');
+	wp_enqueue_script( 'userPage', COP_PLUGIN_URL . '/js/user-page.js', array('jquery'), '2.5.9' );
+}
+
 
 function cop_load_js_and_css() {
 	wp_register_script( 'functions.js', COP_PLUGIN_DIR . 'functions.js', array('jquery'), COP_PLUGIN_VERSION );
@@ -105,23 +126,23 @@ function cop_insert($row) {
 	);
 }
 
-function cop_update() {
+function cop_update($row) {
 	global $wpdb;
 
-	$_POST['id'] 	= filter_var($_POST['id'], FILTER_VALIDATE_INT);
-	$_POST['label'] = stripslashes_deep(filter_var($_POST['label'], FILTER_SANITIZE_SPECIAL_CHARS));
-	$_POST['name'] 	= stripslashes_deep(filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS));
-	$_POST['value'] = stripslashes_deep(filter_var($_POST['value'], FILTER_UNSAFE_RAW));
+	$row['id'] 	= filter_var($row['id'], FILTER_VALIDATE_INT);
+	$row['label'] = stripslashes_deep(filter_var($row['label'], FILTER_SANITIZE_SPECIAL_CHARS));
+	$row['name'] 	= stripslashes_deep(filter_var($row['name'], FILTER_SANITIZE_SPECIAL_CHARS));
+	$row['value'] = stripslashes_deep(filter_var($row['value'], FILTER_UNSAFE_RAW));
 
 
 	return $wpdb->update(
 		COP_TABLE,
 		array(
-			'label' => $_POST['label'],
-			'name' 	=> $_POST['name'],
-			'value' => stripslashes($_POST['value'])
+			'label' => $row['label'],
+			'name' 	=> $row['name'],
+			'value' => stripslashes($row['value'])
 		),
-		array ('id' => $_POST['id']),
+		array ('id' => $row['id']),
 		array('%s','%s','%s'),
 		array('%d')
 	);
@@ -144,8 +165,12 @@ function cop_get_option( $id ) {
 }
 
 
+function cop_reset_table($table){
+	global $wpdb;
 
-
+	$wpdb->query("ALTER TABLE $table AUTO_INCREMENT = 1");
+	$wpdb->query("TRUNCATE TABLE $table");
+}
 
 //Panel Admin
 function custom_options_plus_adm() {
@@ -178,7 +203,7 @@ function custom_options_plus_adm() {
 			$message = '<div class="updated"><p><strong>' . __('Settings saved.') . '</strong></p></div>';
 
 		elseif ($_POST['id'] > 0) :
-			cop_update();
+			cop_update($_POST);
 			$message = '<div class="updated"><p><strong>' . __('Settings saved.') . '</strong></p></div>';
 
 		endif;
@@ -281,7 +306,7 @@ function custom_options_plus_adm() {
 		</form>
 
 		<p>
-			<form enctype="multipart/form-data" id="import-form" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
+			<form enctype="multipart/form-data" id="import-form">
 				<input type="hidden" name="action" value="import">
 
 				<label for="cop-import">
@@ -290,6 +315,7 @@ function custom_options_plus_adm() {
 				<input type="file" name="file_import" id="cop-import" class="button-primary hidden" value="<?php _e('Import'); ?>" />
 			</form>
 			<button name id="cop-export" class="button-primary"><?php _e('Export'); ?></button>
+
 		</p>
 
 	</div>
@@ -345,7 +371,7 @@ function export_data() {
 
 	header('Content-type: application/json');
 
-	$result = $wpdb->get_results( "SELECT * FROM $COP_TABLE");
+	$result = cop_get_options();
 
 	$data = [];
 
@@ -366,7 +392,7 @@ function import_data() {
 	$file_content = file_get_contents($file_obj['tmp_name']);
 	$file_data = json_decode($file_content, true);
 
-	$wpdb->query("TRUNCATE TABLE $COP_TABLE");
+	cop_reset_table($COP_TABLE);
 
 	foreach($file_data as $row){
 		cop_insert($row);
@@ -374,5 +400,33 @@ function import_data() {
 
 	echo json_encode(['err' => false]);
 
+	exit;
+}
+
+//update data in user page
+add_action( 'wp_ajax_update', 'update_data' );
+function update_data() {
+	global $wpdb, $COP_TABLE;
+
+	$data = $_POST;
+	$action = array_pop($data);
+	$cop_data = array_pop($data);
+	$cop_data = json_decode(stripslashes($cop_data));
+
+	$i = 0;
+	foreach($data as $key => $value){
+
+		$args = [
+			'id' => $cop_data[$i]->id,
+			'label' => $cop_data[$i]->label,
+			'name' => $key,
+			'value' => $value
+		];
+
+		cop_update($args);
+		$i++;
+	}
+
+	echo json_encode(['err' => false ]);
 	exit;
 }

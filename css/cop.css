@@ -6,3 +6,7 @@ label[for="cop-import"]{
     float: left;
     margin-right: 8px;
 }
+
+.text-right{
+    text-align:right !important;
+}
