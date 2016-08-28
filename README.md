@@ -29,6 +29,11 @@ Installation
 3. Configure the administration panel in Settings > Custom Options Plus and customize your options plus
 
 
+**Or using bower**
+```
+bower install wp-plugin-custom-options-plus
+```
+
 FAQ (Frequently Asked Questions)
 --------------
 **Used to single option**

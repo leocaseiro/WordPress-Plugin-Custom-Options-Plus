@@ -1,0 +1,22 @@
+{
+  "name": "WordPress-Plugin-Custom-Options-Plus",
+  "version": "1.7.0",
+  "homepage": "https://github.com/lucasbhjf/WordPress-Plugin-Custom-Options-Plus",
+  "authors": [
+    "leocaseiro <http://leocaseiro.com.br/>",
+    "lucasbhjf <lucasbhjf@gmail.com>"
+  ],
+  "description": "With Custom Options Plus WordPress Plugin, you can enter your custom options datas for your theme.",
+  "main": "custom-options-plus",
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "wp-plugin",
+    "lucasbhjf",
+    "leocaseiro",
+    "options",
+    "cop",
+    "custom options plus"
+  ],
+  "license": "MIT"
+}
