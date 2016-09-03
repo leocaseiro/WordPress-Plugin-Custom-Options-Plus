@@ -42,7 +42,9 @@ define( 'COP_PLUGIN_URL', WP_PLUGIN_URL . '/' . COP_PLUGIN_NAME );
 define( 'COP_OPTIONS_PREFIX', 'cop_' );
 define( 'COP_PLUGIN_VERSION', '1.6' );
 
-define('COP_SECURITY_STRING', 'Silence is golden!');
+
+
+define('COP_SECURITY_STRING', date('h'));
 
 global $wpdb, $COP_TABLE;
 define( 'COP_TABLE',  $wpdb->prefix . 'custom_options_plus' );
@@ -108,7 +110,6 @@ function cop_add_menu() {
 function cop_user_page(){
 	global $plugin_data;
 	$plugin_data['ajax_nonce'] = cop_create_ajax_nonce();
-
 
 	require(COP_PLUGIN_DIR.'/cop-user-page.php');
 

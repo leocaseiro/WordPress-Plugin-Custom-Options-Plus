@@ -62,13 +62,17 @@ jQuery(document).ready(function($) {
         },
         ajaxExport: function(){
 
-            $.post(ajaxurl, {action: 'export'}, function(data){
+            $.post(ajaxurl, {action: 'cop_export'}, function(data){
+
+                location.reload();
+
                 var $link = $('<a class="download-link">download</a>');
                 $link.attr('download', 'cop.json');
                 $link.attr('href', ajaxurl + '?action=cop_export&security=' + cop.ajax_nonce);
                 $('body').append($link);
                 $link.get(0).click();
                 $link.remove();
+                
             });
         },
 
