@@ -436,8 +436,10 @@ function cop_update_data(){
 	header('Content-type: application/json');
 
 	$data = $_POST;
+	array_pop($data);//security
 	$action = array_pop($data);
 	$cop_data = array_pop($data);
+
 	$cop_data = json_decode(stripslashes($cop_data));
 
 	$i = 0;
@@ -455,7 +457,8 @@ function cop_update_data(){
 	}
 
 	$data = [
-		'msg' => __('Options update successfully!', COP_PLUGIN_NAME)
+		'msg' => __('Options update successfully!', COP_PLUGIN_NAME),
+		'debug' => $data
 	];
 
 	wp_send_json_success( $data );
