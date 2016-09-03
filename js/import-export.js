@@ -91,7 +91,6 @@ jQuery(document).ready(function($) {
             setInterval(function(){
                 var currentTime = new Date();
                 currentTime = currentTime.getHours();
-                console.log(savedTime + ' != '+ currentTime);
                 if(savedTime != currentTime) location.reload();
 
             }, 30 * 60 * 1000);
