@@ -457,8 +457,7 @@ function cop_update_data(){
 	}
 
 	$data = [
-		'msg' => __('Options update successfully!', COP_PLUGIN_NAME),
-		'debug' => $data
+		'msg' => __('Options update successfully!', COP_PLUGIN_NAME)
 	];
 
 	wp_send_json_success( $data );
