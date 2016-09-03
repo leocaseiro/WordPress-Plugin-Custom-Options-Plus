@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2016-09-03 09:03-0300\n"
-"PO-Revision-Date: 2016-09-03 09:04-0300\n"
+"POT-Creation-Date: 2016-09-03 11:04-0300\n"
+"PO-Revision-Date: 2016-09-03 11:04-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -17,34 +17,38 @@ msgstr ""
 "X-Poedit-SearchPath-1: .\n"
 "X-Poedit-SearchPathExcluded-0: js\n"
 
-#: custom-options-plus.php:91
-msgid "Options"
-msgstr "Opções"
-
-#: custom-options-plus.php:194 custom-options-plus.php:202
-#: custom-options-plus.php:206
-msgid "Settings saved."
-msgstr "Configurações salvas."
-
-#: custom-options-plus.php:310
-msgid "Import/Export Settings"
-msgstr "Configurações de Importação e Exportação"
-
-#: custom-options-plus.php:315
-msgid "click here to clear table before import new data"
-msgstr "clique aqui para limpar a tabela antes de importar os dados"
-
-#: custom-options-plus.php:333
+#: cop-err-msg.php:2
 msgid "Are you sure do you want import this file?"
 msgstr "Tem certeza que deseja importa este arquivo?"
 
-#: custom-options-plus.php:334
+#: cop-err-msg.php:3
 msgid "Error on import file: not a json or more than a file uploaded!"
 msgstr ""
 "Erro na importação do arquivo: não é um arquivo JSON ou foi selecionado mais "
 "de um arquivo!"
 
-#: custom-options-plus.php:449
+#: cop-import-export.php:4
+msgid "Import/Export Settings"
+msgstr "Configurações de Importação e Exportação"
+
+#: cop-import-export.php:9
+msgid "click here to clear table before import new data"
+msgstr "clique aqui para limpar a tabela antes de importar os dados"
+
+#: custom-options-plus.php:102
+msgid "Options"
+msgstr "Opções"
+
+#: custom-options-plus.php:218 custom-options-plus.php:226
+#: custom-options-plus.php:230
+msgid "Settings saved."
+msgstr "Configurações salvas."
+
+#: custom-options-plus.php:419
+msgid "Options imported successfully!"
+msgstr "Opções importadas com sucesso!"
+
+#: custom-options-plus.php:453
 msgid "Options update successfully!"
 msgstr "Opções salvas com sucesso!"
 

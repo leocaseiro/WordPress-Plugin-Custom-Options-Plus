@@ -42,11 +42,23 @@ define( 'COP_PLUGIN_URL', WP_PLUGIN_URL . '/' . COP_PLUGIN_NAME );
 define( 'COP_OPTIONS_PREFIX', 'cop_' );
 define( 'COP_PLUGIN_VERSION', '1.6' );
 
+define('COP_SECURITY_STRING', 'Silence is golden!');
+
 global $wpdb, $COP_TABLE;
 define( 'COP_TABLE',  $wpdb->prefix . 'custom_options_plus' );
 
+
 //Added on 1.5 as GLOBAL
 $COP_TABLE = COP_TABLE;
+
+$plugin_data = [
+	'ajax_nonce' =>	''
+];
+
+
+function cop_create_ajax_nonce(){
+	return 	wp_create_nonce( COP_SECURITY_STRING );
+}
 
 //Create a table in MySQL database when activate plugin
 function cop_setup() {
@@ -78,7 +90,6 @@ function cop_add_menu() {
 
  	global $my_plugin_hook;
 
-
 	add_action( 'admin_menu', 'my_plugin_menu' );
 	$logged_user = wp_get_current_user();
 	$main_user = get_user_by('id', 1);
@@ -95,9 +106,18 @@ function cop_add_menu() {
 }
 
 function cop_user_page(){
+	global $plugin_data;
+	$plugin_data['ajax_nonce'] = cop_create_ajax_nonce();
+
+
 	require(COP_PLUGIN_DIR.'/cop-user-page.php');
+
 	wp_enqueue_style('copCss', COP_PLUGIN_URL . '/css/cop.css');
-	wp_enqueue_script( 'userPage', COP_PLUGIN_URL . '/js/user-page.js', array('jquery'), '2.5.9' );
+
+	wp_register_script( 'userPage', COP_PLUGIN_URL . '/js/user-page.js',  array('jquery'), '2.5.9' );
+	wp_localize_script( 'userPage', 'cop', $plugin_data);
+	wp_enqueue_script( 'userPage');
+
 }
 
 
@@ -174,13 +194,17 @@ function cop_reset_table($table){
 //Panel Admin
 function custom_options_plus_adm() {
 	global $wpdb, $my_plugin_hook;
+	global $plugin_data;
+	$plugin_data['ajax_nonce'] = cop_create_ajax_nonce();
 
 	wp_enqueue_script( 'stringToSlug', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array('jquery'), '2.5.9' );
 	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array('stringToSlug') );
-	wp_enqueue_script( 'importExport', COP_PLUGIN_URL . '/js/import-export.js', array('jquery'), '2.5.9' );
+
+	wp_register_script( 'importExport', COP_PLUGIN_URL . '/js/import-export.js',  array('jquery'), '2.5.9' );
+	wp_localize_script( 'importExport', 'cop', $plugin_data);
+	wp_enqueue_script( 'importExport');
+
 	wp_enqueue_style('copCss', COP_PLUGIN_URL . '/css/cop.css');
-
-
 
 	$id 	= '';
 	$label 	= '';
@@ -304,30 +328,7 @@ function custom_options_plus_adm() {
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button-primary" value="<?php _e('Save Changes'); ?>"></p>
 		</form>
 
-		<p>
-			<form enctype="multipart/form-data" id="import-form">
-
-				<h3><?= __('Import/Export Settings', COP_PLUGIN_NAME); ?></h3>
-
-				<input type="hidden" name="action" value="cop_import">
-				<p>
-					<input id="truncate_import" type="checkbox" name="truncate_import" value="" />
-					<label><?= __('click here to clear table before import new data', COP_PLUGIN_NAME); ?></label>
-				</p>
-
-				<label for="cop-import">
-					<a href="#" class="button-primary fake-button"><?php _e('Import'); ?></a>
-				</label>
-
-
-				<input type="file" name="file_import" id="cop-import" class="button-primary hidden" value="<?php _e('Import'); ?>" />
-
-			</form>
-			<button name id="cop-export" class="button-primary"><?php _e('Export'); ?></button>
-
-		</p>
-
-
+		<?php require(COP_PLUGIN_DIR.'/cop-import-export.php'); ?>
 		<?php require(COP_PLUGIN_DIR.'/cop-err-msg.php'); ?>
 
 	</div>
@@ -381,10 +382,11 @@ add_action( 'wp_ajax_cop_export', 'cop_export_data' );
 function cop_export_data() {
 	global $wpdb, $COP_TABLE;
 
+	check_ajax_referer(COP_SECURITY_STRING, 'security');
+
 	header('Content-type: application/json');
 
 	$result = cop_get_options();
-
 	$data = [];
 
 	foreach($result as $row){
@@ -400,12 +402,14 @@ add_action( 'wp_ajax_cop_import', 'cop_import_data' );
 function cop_import_data() {
 	global $wpdb, $COP_TABLE;
 
+	check_ajax_referer(COP_SECURITY_STRING, 'security');
+
 	$file_obj = $_FILES['file_import'];
 	$file_content = file_get_contents($file_obj['tmp_name']);
 	$file_data = json_decode($file_content, true);
 
 
-	if($_POST['truncate_import']){
+	if(isset($_POST['truncate_import'])){
 		cop_reset_table($COP_TABLE);
 	}
 
@@ -413,8 +417,11 @@ function cop_import_data() {
 		cop_insert($row);
 	}
 
+	$data = [
+		'msg' => __('Options imported successfully!', COP_PLUGIN_NAME)
+	];
 
-	wp_send_json_success();
+	wp_send_json_success($data);
 	exit;
 }
 
@@ -422,6 +429,8 @@ function cop_import_data() {
 add_action( 'wp_ajax_cop_update', 'cop_update_data' );
 function cop_update_data(){
 	global $wpdb, $COP_TABLE;
+
+	check_ajax_referer(COP_SECURITY_STRING, 'security');
 
 	header('Content-type: application/json');
 
@@ -456,7 +465,6 @@ function cop_update_data(){
 add_action( 'init', 'cop_load_textdomain' );
 
 function cop_load_textdomain() {
-
 	if(get_locale() == 'pt_BR'){
 		load_textdomain(COP_PLUGIN_NAME, COP_PLUGIN_DIR.'/languages/pt_BR.mo');
 	}

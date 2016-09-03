@@ -6,7 +6,6 @@
         $options = cop_get_options();
         foreach($options as $option):
     ?>
-
             <tr cop-label="<?= $option->label; ?>" cop-id="<?= $option->id; ?>" >
                 <th class="text-right" scope="row">
                     <label for="cop-<?= $option->name; ?>"><?= $option->label; ?>:</label>
@@ -22,7 +21,6 @@
     </table>
 
     <p class="submit"><input type="submit" name="submit" id="submit" class="button-primary" value="<?php _e('Save Changes'); ?>"></p>
-
 
     <?php require(COP_PLUGIN_DIR.'/cop-err-msg.php'); ?>
 </form>

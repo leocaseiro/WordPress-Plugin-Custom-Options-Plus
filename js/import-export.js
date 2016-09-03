@@ -7,6 +7,7 @@ jQuery(document).ready(function($) {
 
                 var formData = new FormData(this);
                 formData.append('action', 'cop_import');
+                formData.append('security', cop.ajax_nonce);
 
                 $.ajax({
                     url : ajaxurl,
@@ -16,7 +17,7 @@ jQuery(document).ready(function($) {
                     contentType: false,
                     success : function(response) {
                         if(response.success){
-                            alert(response.msg);
+                            alert(response.data.msg);
                             location.reload();
                         }
                     }
@@ -32,7 +33,6 @@ jQuery(document).ready(function($) {
                 var files = e.currentTarget.files;
 
                 var errMsgs = $('#cop-err-msg')[0].content.querySelectorAll('p');
-
 
                 if(files.length == 1 && files[0].type == 'application/json'){
 
@@ -65,7 +65,7 @@ jQuery(document).ready(function($) {
             $.post(ajaxurl, {action: 'export'}, function(data){
                 var $link = $('<a class="download-link">download</a>');
                 $link.attr('download', 'cop.json');
-                $link.attr('href', ajaxurl + '?action=cop_export');
+                $link.attr('href', ajaxurl + '?action=cop_export&security=' + cop.ajax_nonce);
                 $('body').append($link);
                 $link.get(0).click();
                 $link.remove();

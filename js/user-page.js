@@ -16,6 +16,7 @@ jQuery(document).ready(function($) {
 
                 formData.append('cop-data', JSON.stringify(dataToSend));
                 formData.append('action', 'cop_update');
+                formData.append('security', cop.ajax_nonce);
 
                 $.ajax({
                     url: ajaxurl,
@@ -25,7 +26,6 @@ jQuery(document).ready(function($) {
                     contentType: false,
                     success: function(response) {
                         if (response.success) {
-                            // console.log(response);
                             alert(response.data.msg);
                             location.reload();
                         }
