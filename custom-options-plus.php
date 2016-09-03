@@ -42,11 +42,25 @@ define( 'COP_PLUGIN_URL', WP_PLUGIN_URL . '/' . COP_PLUGIN_NAME );
 define( 'COP_OPTIONS_PREFIX', 'cop_' );
 define( 'COP_PLUGIN_VERSION', '1.6' );
 
+
+
+define('COP_SECURITY_STRING', date('h'));
+
 global $wpdb, $COP_TABLE;
 define( 'COP_TABLE',  $wpdb->prefix . 'custom_options_plus' );
 
+
 //Added on 1.5 as GLOBAL
 $COP_TABLE = COP_TABLE;
+
+$plugin_data = [
+	'ajax_nonce' =>	''
+];
+
+
+function cop_create_ajax_nonce(){
+	return 	wp_create_nonce( COP_SECURITY_STRING );
+}
 
 //Create a table in MySQL database when activate plugin
 function cop_setup() {
@@ -77,9 +91,36 @@ add_action('admin_menu', 'cop_add_menu');
 function cop_add_menu() {
 
  	global $my_plugin_hook;
- 	$my_plugin_hook = add_options_page('Custom Options Plus', 'Custom Options Plus', 'manage_options', 'custom_options_plus', 'custom_options_plus_adm');
+
+	add_action( 'admin_menu', 'my_plugin_menu' );
+	$logged_user = wp_get_current_user();
+	$main_user = get_user_by('id', 1);
+
+
+	if($logged_user->id == $main_user->ID){
+ 		$my_plugin_hook = add_options_page('Custom Options Plus', 'Custom Options Plus', 'manage_options', 'custom_options_plus', 'custom_options_plus_adm');
+	}
+
+	$menuName = __('Options', COP_PLUGIN_NAME);
+
+	add_menu_page( 'COP User Page', $menuName , 'manage_options', 'cop-user-page', 'cop_user_page');
 
 }
+
+function cop_user_page(){
+	global $plugin_data;
+	$plugin_data['ajax_nonce'] = cop_create_ajax_nonce();
+
+	require(COP_PLUGIN_DIR.'/cop-user-page.php');
+
+	wp_enqueue_style('copCss', COP_PLUGIN_URL . '/css/cop.css');
+
+	wp_register_script( 'userPage', COP_PLUGIN_URL . '/js/user-page.js',  array('jquery'), '2.5.9' );
+	wp_localize_script( 'userPage', 'cop', $plugin_data);
+	wp_enqueue_script( 'userPage');
+
+}
+
 
 function cop_load_js_and_css() {
 	wp_register_script( 'functions.js', COP_PLUGIN_DIR . 'functions.js', array('jquery'), COP_PLUGIN_VERSION );
@@ -87,41 +128,41 @@ function cop_load_js_and_css() {
 }
 
 
-function cop_insert() {
+function cop_insert($row) {
 	global $wpdb;
 
-	$_POST['label'] = stripslashes_deep(filter_var($_POST['label'], FILTER_SANITIZE_SPECIAL_CHARS));
-	$_POST['name'] 	= stripslashes_deep(filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS));
-	$_POST['value'] = stripslashes_deep(filter_var($_POST['value'], FILTER_UNSAFE_RAW));
+	$row['label'] = stripslashes_deep(filter_var($row['label'], FILTER_SANITIZE_SPECIAL_CHARS));
+	$row['name'] 	= stripslashes_deep(filter_var($row['name'], FILTER_SANITIZE_SPECIAL_CHARS));
+	$row['value'] = stripslashes_deep(filter_var($row['value'], FILTER_UNSAFE_RAW));
 
 	return $wpdb->insert(
 		COP_TABLE,
 		array(
-			'label' => $_POST['label'],
-			'name' => $_POST['name'],
-			'value' => stripslashes($_POST['value'])
+			'label' => $row['label'],
+			'name' => $row['name'],
+			'value' => stripslashes($row['value'])
 		),
 		array('%s','%s','%s')
 	);
 }
 
-function cop_update() {
+function cop_update($row) {
 	global $wpdb;
 
-	$_POST['id'] 	= filter_var($_POST['id'], FILTER_VALIDATE_INT);
-	$_POST['label'] = stripslashes_deep(filter_var($_POST['label'], FILTER_SANITIZE_SPECIAL_CHARS));
-	$_POST['name'] 	= stripslashes_deep(filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS));
-	$_POST['value'] = stripslashes_deep(filter_var($_POST['value'], FILTER_UNSAFE_RAW));
+	$row['id'] 	= filter_var($row['id'], FILTER_VALIDATE_INT);
+	$row['label'] = stripslashes_deep(filter_var($row['label'], FILTER_SANITIZE_SPECIAL_CHARS));
+	$row['name'] 	= stripslashes_deep(filter_var($row['name'], FILTER_SANITIZE_SPECIAL_CHARS));
+	$row['value'] = stripslashes_deep(filter_var($row['value'], FILTER_UNSAFE_RAW));
 
 
 	return $wpdb->update(
 		COP_TABLE,
 		array(
-			'label' => $_POST['label'],
-			'name' 	=> $_POST['name'],
-			'value' => stripslashes($_POST['value'])
+			'label' => $row['label'],
+			'name' 	=> $row['name'],
+			'value' => stripslashes($row['value'])
 		),
-		array ('id' => $_POST['id']),
+		array ('id' => $row['id']),
 		array('%s','%s','%s'),
 		array('%d')
 	);
@@ -144,16 +185,27 @@ function cop_get_option( $id ) {
 }
 
 
+function cop_reset_table($table){
+	global $wpdb;
 
-
+	$wpdb->query("ALTER TABLE $table AUTO_INCREMENT = 1");
+	$wpdb->query("TRUNCATE TABLE $table");
+}
 
 //Panel Admin
 function custom_options_plus_adm() {
 	global $wpdb, $my_plugin_hook;
+	global $plugin_data;
+	$plugin_data['ajax_nonce'] = cop_create_ajax_nonce();
 
 	wp_enqueue_script( 'stringToSlug', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array('jquery'), '2.5.9' );
 	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array('stringToSlug') );
 
+	wp_register_script( 'importExport', COP_PLUGIN_URL . '/js/import-export.js',  array('jquery'), '2.5.9' );
+	wp_localize_script( 'importExport', 'cop', $plugin_data);
+	wp_enqueue_script( 'importExport');
+
+	wp_enqueue_style('copCss', COP_PLUGIN_URL . '/css/cop.css');
 
 	$id 	= '';
 	$label 	= '';
@@ -171,11 +223,11 @@ function custom_options_plus_adm() {
 	elseif ( isset($_POST['id']) ) :
 
 		if ($_POST['id'] == '') :
-			cop_insert();
+			cop_insert($_POST);
 			$message = '<div class="updated"><p><strong>' . __('Settings saved.') . '</strong></p></div>';
 
 		elseif ($_POST['id'] > 0) :
-			cop_update();
+			cop_update($_POST);
 			$message = '<div class="updated"><p><strong>' . __('Settings saved.') . '</strong></p></div>';
 
 		endif;
@@ -277,6 +329,9 @@ function custom_options_plus_adm() {
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button-primary" value="<?php _e('Save Changes'); ?>"></p>
 		</form>
 
+		<?php require(COP_PLUGIN_DIR.'/cop-import-export.php'); ?>
+		<?php require(COP_PLUGIN_DIR.'/cop-err-msg.php'); ?>
+
 	</div>
 <?php
 }
@@ -322,3 +377,98 @@ function cop_plugin_help($contextual_help, $screen_id, $screen) {
 }
 
 add_filter('contextual_help', 'cop_plugin_help', 10, 3);
+
+//ajax import and export
+add_action( 'wp_ajax_cop_export', 'cop_export_data' );
+function cop_export_data() {
+	global $wpdb, $COP_TABLE;
+
+	check_ajax_referer(COP_SECURITY_STRING, 'security');
+
+	header('Content-type: application/json');
+
+	$result = cop_get_options();
+	$data = [];
+
+	foreach($result as $row){
+		$data[] = $row;
+	}
+
+	echo json_encode($data, JSON_PRETTY_PRINT);
+	exit;
+}
+
+
+add_action( 'wp_ajax_cop_import', 'cop_import_data' );
+function cop_import_data() {
+	global $wpdb, $COP_TABLE;
+
+	check_ajax_referer(COP_SECURITY_STRING, 'security');
+
+	$file_obj = $_FILES['file_import'];
+	$file_content = file_get_contents($file_obj['tmp_name']);
+	$file_data = json_decode($file_content, true);
+
+
+	if(isset($_POST['truncate_import'])){
+		cop_reset_table($COP_TABLE);
+	}
+
+	foreach($file_data as $row){
+		cop_insert($row);
+	}
+
+	$data = [
+		'msg' => __('Options imported successfully!', COP_PLUGIN_NAME)
+	];
+
+	wp_send_json_success($data);
+	exit;
+}
+
+//update data in user page
+add_action( 'wp_ajax_cop_update', 'cop_update_data' );
+function cop_update_data(){
+	global $wpdb, $COP_TABLE;
+
+	check_ajax_referer(COP_SECURITY_STRING, 'security');
+
+	header('Content-type: application/json');
+
+	$data = $_POST;
+	array_pop($data);//security
+	$action = array_pop($data);
+	$cop_data = array_pop($data);
+
+	$cop_data = json_decode(stripslashes($cop_data));
+
+	$i = 0;
+	foreach($data as $key => $value){
+
+		$args = [
+			'id' => $cop_data[$i]->id,
+			'label' => $cop_data[$i]->label,
+			'name' => $key,
+			'value' => $value
+		];
+
+		cop_update($args);
+		$i++;
+	}
+
+	$data = [
+		'msg' => __('Options update successfully!', COP_PLUGIN_NAME)
+	];
+
+	wp_send_json_success( $data );
+	exit;
+}
+
+//i18n feature
+add_action( 'init', 'cop_load_textdomain' );
+
+function cop_load_textdomain() {
+	if(get_locale() == 'pt_BR'){
+		load_textdomain(COP_PLUGIN_NAME, COP_PLUGIN_DIR.'/languages/pt_BR.mo');
+	}
+}
