@@ -72,7 +72,7 @@ jQuery(document).ready(function($) {
                 $('body').append($link);
                 $link.get(0).click();
                 $link.remove();
-                
+
             });
         },
 
@@ -83,11 +83,26 @@ jQuery(document).ready(function($) {
             });
         },
 
+        refreshControl: function(){
+
+            var savedTime = new Date();
+            savedTime = savedTime.getHours();
+
+            setInterval(function(){
+                var currentTime = new Date();
+                currentTime = currentTime.getHours();
+                console.log(savedTime + ' != '+ currentTime);
+                if(savedTime != currentTime) location.reload();
+
+            }, 30 * 60 * 1000);
+        },
+
         init: function(){
             this.clickExport();
             this.fakeButton();
             this.fileImport();
             this.importSubmit();
+            this.refreshControl();
         }
     };
 
