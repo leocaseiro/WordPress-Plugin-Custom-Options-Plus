@@ -306,21 +306,29 @@ function custom_options_plus_adm() {
 
 		<p>
 			<form enctype="multipart/form-data" id="import-form">
-				<input type="hidden" name="action" value="import">
+
+				<h3><?= __('Import/Export Settings', COP_PLUGIN_NAME); ?></h3>
+
+				<input type="hidden" name="action" value="cop_import">
+				<p>
+					<input id="truncate_import" type="checkbox" name="truncate_import" value="" />
+					<label><?= __('click here to clear table before import new data', COP_PLUGIN_NAME); ?></label>
+				</p>
 
 				<label for="cop-import">
 					<a href="#" class="button-primary fake-button"><?php _e('Import'); ?></a>
 				</label>
+
+
 				<input type="file" name="file_import" id="cop-import" class="button-primary hidden" value="<?php _e('Import'); ?>" />
+
 			</form>
 			<button name id="cop-export" class="button-primary"><?php _e('Export'); ?></button>
 
 		</p>
 
-		<template id="cop-err-msg">
-			<p><?= __('Are you sure do you want import this file? Current data will be overwriten!', COP_PLUGIN_NAME); ?></p>
-			<p><?= __('Error on import file: not a json or more than a file uploaded!', COP_PLUGIN_NAME); ?></p>
-		</template>
+
+		<?php require(COP_PLUGIN_DIR.'/cop-err-msg.php'); ?>
 
 	</div>
 <?php
@@ -369,8 +377,8 @@ function cop_plugin_help($contextual_help, $screen_id, $screen) {
 add_filter('contextual_help', 'cop_plugin_help', 10, 3);
 
 //ajax import and export
-add_action( 'wp_ajax_export', 'export_data' );
-function export_data() {
+add_action( 'wp_ajax_cop_export', 'cop_export_data' );
+function cop_export_data() {
 	global $wpdb, $COP_TABLE;
 
 	header('Content-type: application/json');
@@ -388,28 +396,31 @@ function export_data() {
 }
 
 
-add_action( 'wp_ajax_import', 'import_data' );
-function import_data() {
+add_action( 'wp_ajax_cop_import', 'cop_import_data' );
+function cop_import_data() {
 	global $wpdb, $COP_TABLE;
 
 	$file_obj = $_FILES['file_import'];
 	$file_content = file_get_contents($file_obj['tmp_name']);
 	$file_data = json_decode($file_content, true);
 
-	cop_reset_table($COP_TABLE);
+
+	if($_POST['truncate_import']){
+		cop_reset_table($COP_TABLE);
+	}
 
 	foreach($file_data as $row){
 		cop_insert($row);
 	}
 
-	echo json_encode(['err' => false]);
 
+	wp_send_json_success();
 	exit;
 }
 
 //update data in user page
-add_action( 'wp_ajax_update', 'update_data' );
-function update_data() {
+add_action( 'wp_ajax_cop_update', 'cop_update_data' );
+function cop_update_data(){
 	global $wpdb, $COP_TABLE;
 
 	header('Content-type: application/json');
@@ -433,8 +444,11 @@ function update_data() {
 		$i++;
 	}
 
+	$data = [
+		'msg' => __('Options update successfully!', COP_PLUGIN_NAME)
+	];
 
-	echo json_encode(['err' => false, 'msg' => __('Options update successfully!', COP_PLUGIN_NAME) ]);
+	wp_send_json_success( $data );
 	exit;
 }
 

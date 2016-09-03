@@ -22,4 +22,7 @@
     </table>
 
     <p class="submit"><input type="submit" name="submit" id="submit" class="button-primary" value="<?php _e('Save Changes'); ?>"></p>
+
+
+    <?php require(COP_PLUGIN_DIR.'/cop-err-msg.php'); ?>
 </form>

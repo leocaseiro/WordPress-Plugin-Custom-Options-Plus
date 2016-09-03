@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2016-08-28 11:51-0300\n"
-"PO-Revision-Date: 2016-08-28 12:04-0300\n"
+"POT-Creation-Date: 2016-09-03 09:03-0300\n"
+"PO-Revision-Date: 2016-09-03 09:04-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -26,14 +26,31 @@ msgstr "Opções"
 msgid "Settings saved."
 msgstr "Configurações salvas."
 
-#: custom-options-plus.php:321
-msgid "Are you sure do you want import this file? Current data will be overwriten!"
-msgstr "Tem certeza que deseja importa este arquivo? As configurações atuais serão sobreescritas!"
+#: custom-options-plus.php:310
+msgid "Import/Export Settings"
+msgstr "Configurações de Importação e Exportação"
 
-#: custom-options-plus.php:322
+#: custom-options-plus.php:315
+msgid "click here to clear table before import new data"
+msgstr "clique aqui para limpar a tabela antes de importar os dados"
+
+#: custom-options-plus.php:333
+msgid "Are you sure do you want import this file?"
+msgstr "Tem certeza que deseja importa este arquivo?"
+
+#: custom-options-plus.php:334
 msgid "Error on import file: not a json or more than a file uploaded!"
-msgstr "Erro na importação do arquivo: não é um arquivo JSON ou foi selecionado mais de um arquivo!"
+msgstr ""
+"Erro na importação do arquivo: não é um arquivo JSON ou foi selecionado mais "
+"de um arquivo!"
 
-#: custom-options-plus.php:437
+#: custom-options-plus.php:449
 msgid "Options update successfully!"
 msgstr "Opções salvas com sucesso!"
+
+#~ msgid ""
+#~ "Are you sure do you want import this file? Current data will be "
+#~ "overwriten!"
+#~ msgstr ""
+#~ "Tem certeza que deseja importa este arquivo? As configurações atuais "
+#~ "serão sobreescritas!"
