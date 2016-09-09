@@ -1,12 +1,12 @@
 jQuery(document).ready(function ($) {
-    console.log('oooo');
     var importExport = {
 
         importSubmit: function () {
             $('#cop-import-form').submit(function (e) {
+                e.preventDefault();
+
                 var formData = new FormData(this);
                 formData.append('action', 'cop/import');
-                console.log('formData', formData);
 
                 $.ajax({
                     url: ajaxurl,
@@ -14,36 +14,42 @@ jQuery(document).ready(function ($) {
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function (data) {
-                        console.log('import', data);
-
-                        if ( ! data.success ) {
-                            // location.reload();
+                    success: function (response) {
+                        console.log('import data', response);
+                        if ( response.success ) {
+                            window.location.reload();
+                            return true;
+                        } else if ( response.data.message ) {
+                            alert('Error: ' + response.data.message);
+                            return false;
                         } else {
                             console.error('Error', data);
+                            return false;
                         }
                     }
                 });
-
-                return false;
             });
         },
 
         fileImport: function () {
             $('#cop-import').change(function (e) {
 
+                var shouldImport = false;
                 var files = e.currentTarget.files;
 
-                if (files.length == 1 && files[ 0 ].type == 'application/json') {
+                if ( files.length !== 1 || files[ 0 ].type !== 'application/json' ) {
+                    alert('Error: invalid JSON format');
+                    return;
+                }
 
-                    var confirmImport = confirm('Are you sure do you want import this file? Current data will be overwriten!');
+                if (! $('#should-clear-table').is(':checked') ) {
+                    shouldImport = true;
+                } else if ( confirm( 'Are you sure you want to erase all data before import?\nThis action is irreversible.' ) ) {
+                    shouldImport = true;
+                }
 
-                    if (confirmImport) {
-                        $('#cop-import-form').submit();
-                    }
-
-                } else {
-                    alert('Error on import file: not a json or more than a file uploaded!');
+                if (shouldImport) {
+                    $('#cop-import-form').submit();
                 }
 
             });

@@ -91,14 +91,6 @@ function cop_add_menu() {
 
 }
 
-// Insert JS and CSS
-function cop_load_js_and_css() {
-//	wp_register_script( 'jquery.stringToSlug.min.js', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array('jquery'), COP_PLUGIN_VERSION, true );
-//	wp_register_script( 'cop-functions', COP_PLUGIN_URL . '/js/functions.js', array('jquery', 'jquery.stringToSlug.min.js'), COP_PLUGIN_VERSION, true );
-//	wp_register_script( 'cop-import-export', COP_PLUGIN_URL . '/js/import-export.js', array('jquery', ), null, true );
-}
-
-
 // Insert on Database
 function cop_insert( $row ) {
 	global $wpdb;
@@ -162,7 +154,7 @@ function cop_get_option( $id ) {
 
 
 
-//Panel Admin
+// Panel Admin
 function custom_options_plus_adm() {
 	global $wpdb, $my_plugin_hook;
 
@@ -266,7 +258,7 @@ function custom_options_plus_adm() {
 				<tbody>
 					<tr valign="top">
 						<th scope="row">
-							<label for="label">Label:</label>
+							<label for="label">*Label:</label>
 						</td>
 						<td>
 							<input name="label" required="required" type="text" id="label" value="<?php echo $label; ?>" class="regular-text">
@@ -282,7 +274,7 @@ function custom_options_plus_adm() {
 					</tr>
 					<tr>
 						<th scope="row">
-							<label for="value">Value:</label>
+							<label for="value">*Value:</label>
 						</td>
 						<td>
 							<textarea required="required" name="value" rows="7" cols="40" type="text" id="value" class="regular-text code"><?php echo $value; ?></textarea>
@@ -291,16 +283,18 @@ function custom_options_plus_adm() {
 				</tbody>
 			</table>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button-primary" value="<?php _e('Save Changes'); ?>"></p>
+			<p><small>* required fields</small></p>
 		</form>
 
 
 		<hr>
 		<h3>Import</h3>
 		<form enctype="multipart/form-data" id="cop-import-form" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
-			<input type="hidden" name="action" value="import">
+			<label><input id="should-clear-table" name="clear-table" type="checkbox" value="true" /> Clear Table before import</label><br />
+				<input type="hidden" name="action" value="import">
 
 			<label for="cop-import">
-				<a href="#" class="button-primary fake-button"><?php _e('Import'); ?></a>
+				<button class="button-primary fake-button"><?php _e('Import'); ?></button>
 			</label>
 			<input style="visibility: hidden" type="file" name="cop_file_import" id="cop-import" class="button-primary hidden" value="<?php _e('Import'); ?>" />
 		</form>
@@ -347,7 +341,7 @@ function cop_plugin_help($contextual_help, $screen_id, $screen) {
 	global $my_plugin_hook;
 	if ($screen_id == $my_plugin_hook) {
 
-		$contextual_help = '<br>Use <br /><em>' . htmlentities('<?php echo get_custom(\'name\') ; ?>') . '</em><br /><br /> or <br><em>' . htmlentities('<?php foreach ( get_customs(\'name\') as $name ) : ') . '<br />    echo $name; <br /> ' . htmlentities('endforeach; ?>') . '</em> <br /> in your theme.';
+		$contextual_help = '<br>Use <br /><code>' . htmlentities('<?php echo get_custom(\'name\') ; ?>') . '</code><br /><br /> or <br><code>' . htmlentities('<?php foreach ( get_customs(\'name\') as $name ) : ') . '<br />    echo $name; <br /> ' . htmlentities('endforeach; ?>') . '</code> <br /> in your theme.';
 	}
 	return $contextual_help;
 }
@@ -366,19 +360,28 @@ add_action( 'wp_ajax_cop/export', 'cop_export_data' );
 function cop_import_data() {
 	global $wpdb, $COP_TABLE;
 
-	if (! isset($_FILES['cop_file_import']) ) {
+	$truncate_table = filter_var($_POST['clear-table'], FILTER_VALIDATE_BOOLEAN);
+
+	if (! isset( $_FILES['cop_file_import'] ) ) {
 		wp_send_json_error();
+	}
+
+	if ($truncate_table) {
+		$wpdb->query( "TRUNCATE TABLE $COP_TABLE" );
 	}
 
 	$file_obj = $_FILES['cop_file_import'];
 	$file_content = file_get_contents($file_obj['tmp_name']);
 
 	$file_data = json_decode($file_content, true);
-	$wpdb->query("TRUNCATE TABLE $COP_TABLE");
-	foreach($file_data as $row){
-		cop_insert($row);
+
+	foreach( $file_data as $row ) {
+		if (! isset( $row['label'] ) || ! isset( $row['name'] ) || ! isset( $row['value'] ) ) {
+			wp_send_json_error(['message' => 'The JSON file is invalid']);
+		}
+		cop_insert( $row );
 	}
 
-	wp_send_json_error();
+	wp_send_json_success();
 }
 add_action( 'wp_ajax_cop/import', 'cop_import_data' );
