@@ -1,7 +1,6 @@
-
-jQuery(document).ready( function($) {
+jQuery(document).ready(function ($) {
 	if ($("#name").val() === '') {
-			$("#label").stringToSlug({
+		$("#label").stringToSlug({
 			setEvents: 'keyup keydown blur',
 			getPut: '#name',
 			space: '_'
