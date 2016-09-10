@@ -7,6 +7,7 @@ jQuery( document ).ready(function( $ ) {
 
 				var formData = new FormData( this );
 				formData.append( 'action', 'cop/import' );
+				formData.append( 'security_cop_ajax_import', $( '#security_cop_ajax_import' ).val() );
 
 				$.ajax({
 					url: ajaxurl,
@@ -15,7 +16,6 @@ jQuery( document ).ready(function( $ ) {
 					processData: false,
 					contentType: false,
 					success: function( response ) {
-						console.log( 'import data', response );
 						if ( response.success ) {
 							window.location.reload();
 							return true;
@@ -63,11 +63,20 @@ jQuery( document ).ready(function( $ ) {
 
 		},
 		ajaxExport: function() {
+			var exportAction = 'cop/export';
+			var exportNonce = $( '#security_cop_ajax_export' ).val();
+			$.post( ajaxurl, {
+				action: exportAction,
+				'security_cop_ajax_export': exportNonce
+			}, function( response ) {
+				if ( response.hasOwnProperty( 'success' ) && false == response.success ) {
+					alert( response.data.message );
+					return false;
+				}
 
-			$.post( ajaxurl, { action: 'export' }, function( data ) {
 				var $link = $( '<a class="download-link">download</a>' );
-				$link.attr( 'download', 'cop.json' );
-				$link.attr( 'href', ajaxurl + '?action=cop/export' );
+				$link.attr( 'download', 'custom-options-plu.json' );
+				$link.attr( 'href', ajaxurl + '?action=' + exportAction + '&security_cop_ajax_export=' + exportNonce );
 				$( 'body' ).append( $link );
 				$link.get( 0 ).click();
 				$link.remove();

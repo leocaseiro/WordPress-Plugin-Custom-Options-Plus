@@ -38,7 +38,7 @@ define( 'COP_PLUGIN_NAME', trim( dirname( COP_PLUGIN_BASENAME ), '/' ) );
 define( 'COP_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . COP_PLUGIN_NAME );
 define( 'COP_PLUGIN_URL', WP_PLUGIN_URL . '/' . COP_PLUGIN_NAME );
 
-//Added on 1.5
+// Added on 1.5
 define( 'COP_OPTIONS_PREFIX', 'cop_' );
 define( 'COP_PLUGIN_VERSION', '1.7.0' );
 
@@ -50,7 +50,7 @@ $COP_TABLE = COP_TABLE;
 
 //Create a table in MySQL database when activate plugin
 function cop_setup() {
-	global $wpdb, $COP_TABLE;
+	global $COP_TABLE;
 
 	$sql = "CREATE TABLE IF NOT EXISTS $COP_TABLE (
 		  `id` int(5) NOT NULL AUTO_INCREMENT,
@@ -220,14 +220,14 @@ function custom_options_plus_adm() {
 					<thead>
 					<tr>
 						<th scope="col" class="manage-column " style="min-width: 100px">Label</th>
-						<th scope="col" class="manage-column column-title">Name</th>
+						<th scope="col" class="manage-column column-title">Key</th>
 						<th scope="col" class="manage-column column-title">Value</th>
 					</tr>
 					</thead>
 					<tfoot>
 					<tr>
 						<th scope="col" class="manage-column column-title">Label</th>
-						<th scope="col" class="manage-column column-title">Name</th>
+						<th scope="col" class="manage-column column-title">Key</th>
 						<th scope="col" class="manage-column column-title">Value</th>
 					</tr>
 					</tfoot>
@@ -283,7 +283,7 @@ function custom_options_plus_adm() {
 				</tr>
 				<tr>
 					<th scope="row">
-						<label for="name">*Name:</label>
+						<label for="name">*Key:</label>
 					</td>
 					<td>
 						<input name="name" required="required" type="text" id="name" value="<?php echo $name; ?>"
@@ -322,11 +322,13 @@ function custom_options_plus_adm() {
 			</label>
 			<input style="visibility: hidden" type="file" name="cop_file_import" id="cop-import"
 			       class="button-primary hidden" value="<?php _e( 'Import' ); ?>"/>
+			<?php wp_nonce_field( 'cop_ajax_import_nonce', 'security_cop_ajax_import' ); ?>
 		</form>
 
 		<hr>
 		<h3>Export</h3>
 		<button name id="cop-export" class="button-primary"><?php _e( 'Export' ); ?></button>
+		<?php wp_nonce_field( 'cop_ajax_export_nonce', 'security_cop_ajax_export' ); ?>
 
 	</div>
 	<?php
@@ -361,13 +363,13 @@ function get_customs( $name ) {
 }
 
 
-//Tutorial on Help Button
+// Tutorial on Help Button
 function cop_plugin_help( $contextual_help, $screen_id, $screen ) {
 
 	global $my_plugin_hook;
 	if ( $screen_id == $my_plugin_hook ) {
 
-		$contextual_help = '<br>Use <br /><code>' . htmlentities( '<?php echo get_custom(\'name\') ; ?>' ) . '</code><br /><br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'name\') as $name ) : ' ) . '<br />    echo $name; <br /> ' . htmlentities( 'endforeach; ?>' ) . '</code> <br /> in your theme.';
+		$contextual_help = '<br>Use <br /><code>' . htmlentities( '<?php echo get_custom(\'yourkey\') ; ?>' ) . '</code><br /><br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'yourkey\') as $name ) : ' ) . '<br />    echo $name; <br /> ' . htmlentities( 'endforeach; ?>' ) . '</code> <br /> in your theme.';
 	}
 
 	return $contextual_help;
@@ -376,19 +378,27 @@ function cop_plugin_help( $contextual_help, $screen_id, $screen ) {
 add_filter( 'contextual_help', 'cop_plugin_help', 10, 3 );
 
 
-// Ajax Export Data
+// Ajax Export Data (Added on 1.7)
 function cop_export_data() {
+	if ( ! wp_verify_nonce( $_REQUEST['security_cop_ajax_export'], 'cop_ajax_export_nonce' ) ) {
+		wp_send_json_error( [ 'message' => 'Access Denied!' ] );
+	}
+
 	header( 'Content-type: application/json' );
+
 	echo json_encode( cop_get_options() );
 	exit;
-//	echo json_encode( cop_get_options() , JSON_PRETTY_PRINT ); exit;
 }
 
 add_action( 'wp_ajax_cop/export', 'cop_export_data' );
 
-// Ajax Import Data
+// Ajax Import Data (Added on 1.7)
 function cop_import_data() {
 	global $wpdb, $COP_TABLE;
+
+	if ( ! wp_verify_nonce( $_POST['security_cop_ajax_import'], 'cop_ajax_import_nonce' ) ) {
+		wp_send_json_error( [ 'message' => 'Access Denied!' ] );
+	}
 
 	$truncate_table = filter_var( $_POST['clear-table'], FILTER_VALIDATE_BOOLEAN );
 
