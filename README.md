@@ -50,6 +50,12 @@ FAQ (Frequently Asked Questions)
 Changelog
 --------------
 
+**1.7.0**
+
+* Add Settings link on Plugins Page
+* Add Import and Export (Thanks @lucasbhjf for his contribution)
+
+
 **1.6**
 
 * Set all fields as required [Fix Issue #6](https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus/issues/6)
