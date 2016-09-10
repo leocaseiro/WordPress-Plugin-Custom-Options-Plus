@@ -5,7 +5,7 @@ Plugin URI: https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus
 Description: The easiest way to add your custom variables as a Settings Page for your Theme. Even with no expertise in PHP.
 You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
 You can also enter the login of your social networks. How to login twitter, Facebook, Youtube, contact email and more.
-Version: 1.7.0
+Version: 1.7.1
 Author: Leo Caseiro
 Author URI: http://leocaseiro.com.br/
 */
@@ -381,7 +381,7 @@ add_filter( 'contextual_help', 'cop_plugin_help', 10, 3 );
 // Ajax Export Data (Added on 1.7)
 function cop_export_data() {
 	if ( ! wp_verify_nonce( $_REQUEST['security_cop_ajax_export'], 'cop_ajax_export_nonce' ) ) {
-		wp_send_json_error( [ 'message' => 'Access Denied!' ] );
+		wp_send_json_error( array('message' => 'Access Denied!'));
 	}
 
 	header( 'Content-type: application/json' );
@@ -397,7 +397,7 @@ function cop_import_data() {
 	global $wpdb, $COP_TABLE;
 
 	if ( ! wp_verify_nonce( $_POST['security_cop_ajax_import'], 'cop_ajax_import_nonce' ) ) {
-		wp_send_json_error( [ 'message' => 'Access Denied!' ] );
+		wp_send_json_error(array('message' => 'Access Denied!'));
 	}
 
 	$truncate_table = filter_var( $_POST['clear-table'], FILTER_VALIDATE_BOOLEAN );
@@ -417,7 +417,7 @@ function cop_import_data() {
 
 	foreach ( $file_data as $row ) {
 		if ( ! isset( $row['label'] ) || ! isset( $row['name'] ) || ! isset( $row['value'] ) ) {
-			wp_send_json_error( [ 'message' => 'The JSON file is invalid' ] );
+			wp_send_json_error(array('message' => 'The JSON file is invalid'));
 		}
 		cop_insert( $row );
 	}

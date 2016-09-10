@@ -4,7 +4,7 @@ Donate link: http://leocaseiro.com.br/contato/
 Tags: configs, custom, custom configs, custom options, custom options plus, custom settings, leocaseiro, options, settings, wp_options
 Requires at least: 2.7
 Tested up to: 4.6
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,8 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 
 
 == Changelog ==
+= 1.7.1 =
+* Fixed array bug that generated errors in old PHP versions
 
 = 1.7.0 =
 
