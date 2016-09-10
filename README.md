@@ -50,6 +50,10 @@ FAQ (Frequently Asked Questions)
 Changelog
 --------------
 
+**1.7.1**
+
+* Fixed array bug that generated errors in old PHP versions. Thanks @AdvancedStyle
+
 **1.7.0**
 
 * Add Settings link on Plugins Page
