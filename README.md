@@ -1,5 +1,7 @@
 WordPress Custom Options Plus Plugin
 =============
+
+[![Join the chat at https://gitter.im/WordPress-Plugin-Custom-Options-Plus/Lobby](https://badges.gitter.im/WordPress-Plugin-Custom-Options-Plus/Lobby.svg)](https://gitter.im/WordPress-Plugin-Custom-Options-Plus/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![WordPress plugin](https://img.shields.io/wordpress/plugin/v/custom-options-plus.svg)](https://wordpress.org/plugins/custom-options-plus/) [![WordPress](https://img.shields.io/wordpress/plugin/dt/custom-options-plus.svg)](https://wordpress.org/plugins/custom-options-plus/) [![WordPress](https://img.shields.io/wordpress/v/custom-options-plus.svg)](https://wordpress.org/plugins/custom-options-plus/) [![WordPress rating](https://img.shields.io/wordpress/plugin/r/custom-options-plus.svg)](https://wordpress.org/plugins/custom-options-plus/)
 
 [WordPress Custom Options Plus](https://wordpress.org/plugins/custom-options-plus/) is the easiest way to add your custom variables as a Settings Page for your Theme.
