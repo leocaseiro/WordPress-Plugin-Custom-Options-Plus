@@ -65,7 +65,6 @@ function cop_setup() {
 
 	dbDelta( $sql );
 
-
 	update_option( COP_OPTIONS_PREFIX . 'version', COP_PLUGIN_VERSION );
 }
 
@@ -97,6 +96,8 @@ function cop_add_menu() {
 function cop_insert( $row ) {
 	global $wpdb;
 
+	cop_redefine_table_to_sequential();
+
 	$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
 	$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
 	$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
@@ -110,6 +111,77 @@ function cop_insert( $row ) {
 		),
 		array( '%s', '%s', '%s' )
 	);
+}
+
+
+function cop_get_last_available_id(){
+	global $wpdb, $COP_TABLE;
+	$dbname = $wpdb->dbname;
+	$result = $wpdb->get_results("
+		SELECT `AUTO_INCREMENT`
+		FROM  INFORMATION_SCHEMA.TABLES
+		WHERE TABLE_SCHEMA = '$dbname'
+		AND TABLE_NAME = '$COP_TABLE';
+	");
+	return $result[0]->AUTO_INCREMENT;
+}
+function cop_check_id_exists($item){
+	global $wpdb, $COP_TABLE;
+	$result = $wpdb->get_results("
+		SELECT id from $COP_TABLE WHERE id = $item->id AND label != '$item->label';
+	");
+	return count($result) ? true : false;
+}
+function cop_redefine_table_to_sequential(){
+	global $wpdb, $COP_TABLE;
+	$data = $wpdb->get_results("SELECT id, label FROM $COP_TABLE ORDER BY id ASC");
+	$id = 1;
+	$result_reset_ai = $wpdb->get_results("ALTER TABLE $COP_TABLE AUTO_INCREMENT = 1");
+	foreach($data as $option){
+		if( !($option->id == $id) ){
+			$wpdb->update(
+				$COP_TABLE,
+				array('id' => $id),
+				array('id' => $option->id)
+			);
+		}
+		$id++;
+	}
+}
+function cop_update_id($item){
+	global $wpdb, $COP_TABLE;
+	$wpdb->query("ALTER TABLE $COP_TABLE AUTO_INCREMENT = 1");
+	$last_id = cop_get_last_available_id();
+	if( cop_check_id_exists($item) ){
+		$wpdb->update(
+			$COP_TABLE,
+			array(
+				'id' => $last_id
+			),
+			array(
+				'id' => $item->id
+			)
+		);
+		$last_id++;
+	}
+	return $wpdb->update(
+		$COP_TABLE,
+		array(
+			'id' => $item->id
+		),
+		array(
+			'label' => $item->label
+		)
+	);
+}
+function cop_update_ids($args){
+	global $wpdb, $COP_TABLE;
+	// cop_redefine_table_to_sequential();
+	$results = array();
+	foreach($args as $item){
+		$results[] = cop_update_id($item);
+	}
+	return $results;
 }
 
 // Update on Database
@@ -140,6 +212,8 @@ function cop_update( $row ) {
 function cop_delete( $id ) {
 	global $wpdb, $COP_TABLE;
 
+	cop_redefine_table_to_sequential();
+
 	return $wpdb->query( $wpdb->prepare( "DELETE FROM $COP_TABLE WHERE id = %d ", $id ) );
 }
 
@@ -147,7 +221,7 @@ function cop_delete( $id ) {
 function cop_get_options() {
 	global $wpdb, $COP_TABLE;
 
-	return $wpdb->get_results( "SELECT id, label, name, value FROM $COP_TABLE ORDER BY label ASC" );
+	return $wpdb->get_results( "SELECT id, label, name, value FROM $COP_TABLE ORDER BY id ASC" );
 }
 
 // Get single option from Database
@@ -165,6 +239,9 @@ function custom_options_plus_adm() {
 	wp_enqueue_script( 'stringToSlug', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array( 'jquery' ), '2.5.9' );
 	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array( 'stringToSlug' ) );
 	wp_enqueue_script( 'cop-import-export', COP_PLUGIN_URL . '/js/import-export.js', array( 'jquery', ), null, true );
+	wp_enqueue_script( 'cop-dnd', COP_PLUGIN_URL . '/js/dnd.js', array( 'jquery', 'jquery-ui-sortable' ), null, true );
+	wp_enqueue_style('cop-css', COP_PLUGIN_URL . '/css/cop.css');
+
 
 	$id    = '';
 	$label = '';
@@ -216,9 +293,10 @@ function custom_options_plus_adm() {
 		<br/>
 		<?php if ( count( $options ) > 0 ) : ?>
 			<div class="wpbody-content">
-				<table class="wp-list-table widefat" cellspacing="0">
+				<table id="cop-sortable-table" class="wp-list-table widefat" cellspacing="0">
 					<thead>
 					<tr>
+						<th scope="col" class="manage-column " style="min-width: 100px">ID</th>
 						<th scope="col" class="manage-column " style="min-width: 100px">Label</th>
 						<th scope="col" class="manage-column column-title">Key</th>
 						<th scope="col" class="manage-column column-title">Value</th>
@@ -226,6 +304,7 @@ function custom_options_plus_adm() {
 					</thead>
 					<tfoot>
 					<tr>
+						<th scope="col" class="manage-column column-title">ID</th>
 						<th scope="col" class="manage-column column-title">Label</th>
 						<th scope="col" class="manage-column column-title">Key</th>
 						<th scope="col" class="manage-column column-title">Value</th>
@@ -236,6 +315,7 @@ function custom_options_plus_adm() {
 					foreach ( $options as $option ) :
 						?>
 						<tr <?php echo $trclass; ?> rowspan="2">
+							<td class="drag id"><?= $option->id; ?></td>
 							<td>
 								<?php echo $option->label; ?>
 								<div class="row-actions">
@@ -247,7 +327,7 @@ function custom_options_plus_adm() {
 											href="<?php echo preg_replace( '/\\&.*/', '', $_SERVER['REQUEST_URI'] ); ?>&del=<?php echo $option->id; ?>">Delete</a></span>
 								</div>
 							</td>
-							<td>
+							<td class="label">
 								<textarea style="font-size:12px;" type="text" onclick="this.select();"
 								          onfocus="this.select();" readonly="readonly"
 								          class="shortcode-in-list-table wp-ui-text-highlight code"><?php echo $option->name; ?></textarea>
@@ -264,6 +344,7 @@ function custom_options_plus_adm() {
 				</table>
 			</div>
 			<br/>
+			<button name id="cop-save-layout" class="button-primary"><?= __('Save layout', COP_PLUGIN_NAME); ?></button>
 		<?php endif; ?>
 
 		<hr>
@@ -300,6 +381,9 @@ function custom_options_plus_adm() {
 					</td>
 				</tr>
 				</tbody>
+
+				<?php wp_nonce_field( 'cop_save_table_layout_nonce', 'security_save_table_layout' ); ?>
+
 			</table>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button-primary"
 			                         value="<?php _e( 'Save Changes' ); ?>"></p>
@@ -426,3 +510,19 @@ function cop_import_data() {
 }
 
 add_action( 'wp_ajax_cop/import', 'cop_import_data' );
+
+
+//drag and drop of table layout
+function cop_save_table_layout(){
+
+	if ( ! wp_verify_nonce( $_POST['security_save_table_layout'], 'cop_save_table_layout_nonce' ) ) {
+		wp_send_json_error(array('message' => 'Access Denied!'));
+	}
+
+	$data = $_POST['data'];
+	$data = json_decode(str_replace('\\', '', $data));
+	$result = cop_update_ids($data);
+	wp_send_json_success($result);
+}
+
+add_action( 'wp_ajax_cop/save_table_layout', 'cop_save_table_layout' );
