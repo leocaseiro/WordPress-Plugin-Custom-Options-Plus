@@ -1,24 +1,3 @@
-.hidden{
-    display: none !important;
-}
-
-label[for="cop-import"]{
-    float: left;
-    margin-right: 8px;
-}
-
-.text-right{
-    text-align:right !important;
-}
-
-
-.disable-select{
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
 #cop-sortable-table td{
     background: #fff;
 }

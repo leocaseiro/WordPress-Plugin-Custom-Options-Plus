@@ -57,6 +57,7 @@ function cop_setup() {
 		  `label` varchar(100) NOT NULL,
 		  `name` varchar(80) NOT NULL,
 		  `value` text NOT NULL,
+		  `order` int NOT NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 	";
@@ -92,119 +93,64 @@ function cop_add_menu() {
 
 }
 
+
 // Insert on Database
 function cop_insert( $row ) {
 	global $wpdb;
 
-	cop_redefine_table_to_sequential();
-
 	$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
 	$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
 	$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
+	$row['order'] = count(cop_get_options()) + 1;
 
 	return $wpdb->insert(
 		COP_TABLE,
 		array(
 			'label' => $row['label'],
 			'name'  => $row['name'],
-			'value' => stripslashes( $row['value'] )
+			'value' => stripslashes( $row['value'] ),
+			'order' => $row['order']
 		),
-		array( '%s', '%s', '%s' )
+		array( '%s', '%s', '%s', '%d')
 	);
-}
-
-
-function cop_get_last_available_id(){
-	global $wpdb, $COP_TABLE;
-	$dbname = $wpdb->dbname;
-	$result = $wpdb->get_results("
-		SELECT `AUTO_INCREMENT`
-		FROM  INFORMATION_SCHEMA.TABLES
-		WHERE TABLE_SCHEMA = '$dbname'
-		AND TABLE_NAME = '$COP_TABLE';
-	");
-	return $result[0]->AUTO_INCREMENT;
-}
-function cop_check_id_exists($item){
-	global $wpdb, $COP_TABLE;
-	$result = $wpdb->get_results("
-		SELECT id from $COP_TABLE WHERE id = $item->id AND label != '$item->label';
-	");
-	return count($result) ? true : false;
-}
-function cop_redefine_table_to_sequential(){
-	global $wpdb, $COP_TABLE;
-	$data = $wpdb->get_results("SELECT id, label FROM $COP_TABLE ORDER BY id ASC");
-	$id = 1;
-	$result_reset_ai = $wpdb->get_results("ALTER TABLE $COP_TABLE AUTO_INCREMENT = 1");
-	foreach($data as $option){
-		if( !($option->id == $id) ){
-			$wpdb->update(
-				$COP_TABLE,
-				array('id' => $id),
-				array('id' => $option->id)
-			);
-		}
-		$id++;
-	}
-}
-function cop_update_id($item){
-	global $wpdb, $COP_TABLE;
-	$wpdb->query("ALTER TABLE $COP_TABLE AUTO_INCREMENT = 1");
-	$last_id = cop_get_last_available_id();
-	if( cop_check_id_exists($item) ){
-		$wpdb->update(
-			$COP_TABLE,
-			array(
-				'id' => $last_id
-			),
-			array(
-				'id' => $item->id
-			)
-		);
-		$last_id++;
-	}
-	return $wpdb->update(
-		$COP_TABLE,
-		array(
-			'id' => $item->id
-		),
-		array(
-			'label' => $item->label
-		)
-	);
-}
-function cop_update_ids($args){
-	global $wpdb, $COP_TABLE;
-	// cop_redefine_table_to_sequential();
-	$results = array();
-	foreach($args as $item){
-		$results[] = cop_update_id($item);
-	}
-	return $results;
 }
 
 // Update on Database
-function cop_update( $row ) {
+function cop_update( $row, $mode = 'normal') {
 	global $wpdb;
 
-	$row['id']    = filter_var( $row['id'], FILTER_VALIDATE_INT );
-	$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
-	$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
-	$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
+	if($mode == 'normal'){
+		$row['id']    = filter_var( $row['id'], FILTER_VALIDATE_INT );
+		$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
+		$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
+		$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
+		$row['order'] = filter_var( $row['order'], FILTER_UNSAFE_RAW );
 
+		return $wpdb->update(
+			COP_TABLE,
+			array(
+				'label' => $row['label'],
+				'name'  => $row['name'],
+				'value' => stripslashes( $row['value'] ),
+				'order' => $row['order']
+			),
+			array( 'id' => $row['id'] ),
+			array( '%s', '%s', '%s', '%d' ),
+			array( '%d' )
+		);
 
-	return $wpdb->update(
-		COP_TABLE,
-		array(
-			'label' => $row['label'],
-			'name'  => $row['name'],
-			'value' => stripslashes( $row['value'] )
-		),
-		array( 'id' => $row['id'] ),
-		array( '%s', '%s', '%s' ),
-		array( '%d' )
-	);
+	}
+	else{
+		return $wpdb->update(
+			COP_TABLE,
+			array(
+				'order' => $row->order,
+			),
+			array( 'label' => $row->label ),
+			array( '%d'),
+			array( '%s' )
+		);
+	}
 
 }
 
@@ -212,7 +158,7 @@ function cop_update( $row ) {
 function cop_delete( $id ) {
 	global $wpdb, $COP_TABLE;
 
-	cop_redefine_table_to_sequential();
+	// cop_redefine_table_to_sequential();
 
 	return $wpdb->query( $wpdb->prepare( "DELETE FROM $COP_TABLE WHERE id = %d ", $id ) );
 }
@@ -221,7 +167,7 @@ function cop_delete( $id ) {
 function cop_get_options() {
 	global $wpdb, $COP_TABLE;
 
-	return $wpdb->get_results( "SELECT id, label, name, value FROM $COP_TABLE ORDER BY id ASC" );
+	return $wpdb->get_results( "SELECT id, label, name, value, $COP_TABLE.order FROM $COP_TABLE ORDER BY $COP_TABLE.order ASC" );
 }
 
 // Get single option from Database
@@ -239,7 +185,7 @@ function custom_options_plus_adm() {
 	wp_enqueue_script( 'stringToSlug', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array( 'jquery' ), '2.5.9' );
 	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array( 'stringToSlug' ) );
 	wp_enqueue_script( 'cop-import-export', COP_PLUGIN_URL . '/js/import-export.js', array( 'jquery', ), null, true );
-	wp_enqueue_script( 'cop-dnd', COP_PLUGIN_URL . '/js/dnd.js', array( 'jquery', 'jquery-ui-sortable' ), null, true );
+	wp_enqueue_script( 'cop-dnd', COP_PLUGIN_URL . '/js/sortable.js', array( 'jquery', 'jquery-ui-sortable' ), null, true );
 	wp_enqueue_style('cop-css', COP_PLUGIN_URL . '/css/cop.css');
 
 
@@ -310,12 +256,13 @@ function custom_options_plus_adm() {
 						<th scope="col" class="manage-column column-title">Value</th>
 					</tr>
 					</tfoot>
-					<tbody id="the-list">
+					<tbody id="cop-sortable-list">
 					<?php $trclass = 'class="alternate"';
 					foreach ( $options as $option ) :
 						?>
+
 						<tr <?php echo $trclass; ?> rowspan="2">
-							<td class="drag id"><?= $option->id; ?></td>
+							<td class="drag id"><?= $option->order; ?></td>
 							<td>
 								<?php echo $option->label; ?>
 								<div class="row-actions">
@@ -343,12 +290,10 @@ function custom_options_plus_adm() {
 					</tbody>
 				</table>
 			</div>
-			<br/>
-			<button name id="cop-save-layout" class="button-primary"><?= __('Save layout', COP_PLUGIN_NAME); ?></button>
 		<?php endif; ?>
 
 		<hr>
-		<form method="post" action="<?php echo preg_replace( '/\\&.*/', '', $_SERVER['REQUEST_URI'] ); ?>">
+		<form id="cop-main-form" method="post" action="<?php echo preg_replace( '/\\&.*/', '', $_SERVER['REQUEST_URI'] ); ?>">
 			<input type="hidden" name="id" value="<?php echo $id; ?>"/>
 			<h3 id="new-custom-option">Add new Custom Option</h3>
 			<table class="form-table">
@@ -521,7 +466,11 @@ function cop_save_table_layout(){
 
 	$data = $_POST['data'];
 	$data = json_decode(str_replace('\\', '', $data));
-	$result = cop_update_ids($data);
+
+	foreach($data as $row){
+		cop_update($row, $mode = 'order');
+	}
+
 	wp_send_json_success($result);
 }
 
