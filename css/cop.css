@@ -1,0 +1,7 @@
+#cop-sortable-table td{
+    background: #fff;
+}
+
+#cop-sortable-table .drag{
+    cursor: move;
+}

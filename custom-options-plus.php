@@ -57,6 +57,7 @@ function cop_setup() {
 		  `label` varchar(100) NOT NULL,
 		  `name` varchar(80) NOT NULL,
 		  `value` text NOT NULL,
+		  `order` int NOT NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 	";
@@ -64,7 +65,6 @@ function cop_setup() {
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 	dbDelta( $sql );
-
 
 	update_option( COP_OPTIONS_PREFIX . 'version', COP_PLUGIN_VERSION );
 }
@@ -93,6 +93,7 @@ function cop_add_menu() {
 
 }
 
+
 // Insert on Database
 function cop_insert( $row ) {
 	global $wpdb;
@@ -100,45 +101,64 @@ function cop_insert( $row ) {
 	$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
 	$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
 	$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
+	$row['order'] = count(cop_get_options()) + 1;
 
 	return $wpdb->insert(
 		COP_TABLE,
 		array(
 			'label' => $row['label'],
 			'name'  => $row['name'],
-			'value' => stripslashes( $row['value'] )
+			'value' => stripslashes( $row['value'] ),
+			'order' => $row['order']
 		),
-		array( '%s', '%s', '%s' )
+		array( '%s', '%s', '%s', '%d')
 	);
 }
 
 // Update on Database
-function cop_update( $row ) {
+function cop_update( $row, $mode = 'normal') {
 	global $wpdb;
 
-	$row['id']    = filter_var( $row['id'], FILTER_VALIDATE_INT );
-	$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
-	$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
-	$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
+	if($mode == 'normal'){
+		$row['id']    = filter_var( $row['id'], FILTER_VALIDATE_INT );
+		$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
+		$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
+		$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
+		$row['order'] = filter_var( $row['order'], FILTER_UNSAFE_RAW );
 
+		return $wpdb->update(
+			COP_TABLE,
+			array(
+				'label' => $row['label'],
+				'name'  => $row['name'],
+				'value' => stripslashes( $row['value'] ),
+				'order' => $row['order']
+			),
+			array( 'id' => $row['id'] ),
+			array( '%s', '%s', '%s', '%d' ),
+			array( '%d' )
+		);
 
-	return $wpdb->update(
-		COP_TABLE,
-		array(
-			'label' => $row['label'],
-			'name'  => $row['name'],
-			'value' => stripslashes( $row['value'] )
-		),
-		array( 'id' => $row['id'] ),
-		array( '%s', '%s', '%s' ),
-		array( '%d' )
-	);
+	}
+	else{
+		return $wpdb->update(
+			COP_TABLE,
+			array(
+				'order' => $row->order,
+			),
+			array( 'label' => $row->label ),
+			array( '%d'),
+			array( '%s' )
+		);
+	}
 
 }
 
 // Delete on Database
 function cop_delete( $id ) {
 	global $wpdb, $COP_TABLE;
+
+	// cop_redefine_table_to_sequential();
 
 	return $wpdb->query( $wpdb->prepare( "DELETE FROM $COP_TABLE WHERE id = %d ", $id ) );
 }
@@ -147,7 +167,7 @@ function cop_delete( $id ) {
 function cop_get_options() {
 	global $wpdb, $COP_TABLE;
 
-	return $wpdb->get_results( "SELECT id, label, name, value FROM $COP_TABLE ORDER BY label ASC" );
+	return $wpdb->get_results( "SELECT id, label, name, value, $COP_TABLE.order FROM $COP_TABLE ORDER BY $COP_TABLE.order ASC" );
 }
 
 // Get single option from Database
@@ -165,6 +185,9 @@ function custom_options_plus_adm() {
 	wp_enqueue_script( 'stringToSlug', COP_PLUGIN_URL . '/js/jquery.stringToSlug.min.js', array( 'jquery' ), '2.5.9' );
 	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array( 'stringToSlug' ) );
 	wp_enqueue_script( 'cop-import-export', COP_PLUGIN_URL . '/js/import-export.js', array( 'jquery', ), null, true );
+	wp_enqueue_script( 'cop-dnd', COP_PLUGIN_URL . '/js/sortable.js', array( 'jquery', 'jquery-ui-sortable' ), null, true );
+	wp_enqueue_style('cop-css', COP_PLUGIN_URL . '/css/cop.css');
+
 
 	$id    = '';
 	$label = '';
@@ -216,9 +239,10 @@ function custom_options_plus_adm() {
 		<br/>
 		<?php if ( count( $options ) > 0 ) : ?>
 			<div class="wpbody-content">
-				<table class="wp-list-table widefat" cellspacing="0">
+				<table id="cop-sortable-table" class="wp-list-table widefat" cellspacing="0">
 					<thead>
 					<tr>
+						<th scope="col" class="manage-column " style="min-width: 100px">ID</th>
 						<th scope="col" class="manage-column " style="min-width: 100px">Label</th>
 						<th scope="col" class="manage-column column-title">Key</th>
 						<th scope="col" class="manage-column column-title">Value</th>
@@ -226,16 +250,19 @@ function custom_options_plus_adm() {
 					</thead>
 					<tfoot>
 					<tr>
+						<th scope="col" class="manage-column column-title">ID</th>
 						<th scope="col" class="manage-column column-title">Label</th>
 						<th scope="col" class="manage-column column-title">Key</th>
 						<th scope="col" class="manage-column column-title">Value</th>
 					</tr>
 					</tfoot>
-					<tbody id="the-list">
+					<tbody id="cop-sortable-list">
 					<?php $trclass = 'class="alternate"';
 					foreach ( $options as $option ) :
 						?>
+
 						<tr <?php echo $trclass; ?> rowspan="2">
+							<td class="drag id"><?= $option->order; ?></td>
 							<td>
 								<?php echo $option->label; ?>
 								<div class="row-actions">
@@ -247,7 +274,7 @@ function custom_options_plus_adm() {
 											href="<?php echo preg_replace( '/\\&.*/', '', $_SERVER['REQUEST_URI'] ); ?>&del=<?php echo $option->id; ?>">Delete</a></span>
 								</div>
 							</td>
-							<td>
+							<td class="label">
 								<textarea style="font-size:12px;" type="text" onclick="this.select();"
 								          onfocus="this.select();" readonly="readonly"
 								          class="shortcode-in-list-table wp-ui-text-highlight code"><?php echo $option->name; ?></textarea>
@@ -263,11 +290,10 @@ function custom_options_plus_adm() {
 					</tbody>
 				</table>
 			</div>
-			<br/>
 		<?php endif; ?>
 
 		<hr>
-		<form method="post" action="<?php echo preg_replace( '/\\&.*/', '', $_SERVER['REQUEST_URI'] ); ?>">
+		<form id="cop-main-form" method="post" action="<?php echo preg_replace( '/\\&.*/', '', $_SERVER['REQUEST_URI'] ); ?>">
 			<input type="hidden" name="id" value="<?php echo $id; ?>"/>
 			<h3 id="new-custom-option">Add new Custom Option</h3>
 			<table class="form-table">
@@ -300,6 +326,9 @@ function custom_options_plus_adm() {
 					</td>
 				</tr>
 				</tbody>
+
+				<?php wp_nonce_field( 'cop_save_table_layout_nonce', 'security_save_table_layout' ); ?>
+
 			</table>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button-primary"
 			                         value="<?php _e( 'Save Changes' ); ?>"></p>
@@ -426,3 +455,23 @@ function cop_import_data() {
 }
 
 add_action( 'wp_ajax_cop/import', 'cop_import_data' );
+
+
+//drag and drop of table layout
+function cop_save_table_layout(){
+
+	if ( ! wp_verify_nonce( $_POST['security_save_table_layout'], 'cop_save_table_layout_nonce' ) ) {
+		wp_send_json_error(array('message' => 'Access Denied!'));
+	}
+
+	$data = $_POST['data'];
+	$data = json_decode(str_replace('\\', '', $data));
+
+	foreach($data as $row){
+		cop_update($row, $mode = 'order');
+	}
+
+	wp_send_json_success($result);
+}
+
+add_action( 'wp_ajax_cop/save_table_layout', 'cop_save_table_layout' );
