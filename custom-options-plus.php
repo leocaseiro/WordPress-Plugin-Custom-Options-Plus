@@ -353,14 +353,7 @@ function get_customs( $name, $label = false) {
 		$list  = $wpdb->get_results( $wpdb->prepare( "SELECT label,value FROM $COP_TABLE WHERE name = %s ", $name ), ARRAY_A );
 		$array = array();
 		foreach ( $list as $key => $name ) :
-			if ($label) {
-				$array[] = [
-					'label' => $name['label'],
-					'value' => $name['value']
-				];
-			} else {
-				$array[] = $name['value'];
-			}
+			$array[] = $label ? ['label' => $name['label'], 'value' => $name['value'] : $name['value'];
 		endforeach;
 
 		return $array;
