@@ -43,7 +43,7 @@ FAQ (Frequently Asked Questions)
 <?php
 	$array = get_customs('array_name');
 	foreach ($array as $name) :
-		echo $name;
+		echo $name['label'] . " - ". $name['value'];
 	endforeach;
 ?>
 ```
