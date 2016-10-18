@@ -347,13 +347,19 @@ function get_custom( $name ) {
 }
 
 // Get your array options
-function get_customs( $name, $label = false) {
+function get_customs( $name, $label = false ) {
 	global $wpdb, $COP_TABLE;
 	if ( '' != $name ) :
-		$list  = $wpdb->get_results( $wpdb->prepare( "SELECT label,value FROM $COP_TABLE WHERE name = %s ", $name ), ARRAY_A );
+		$list  = $wpdb->get_results( $wpdb->prepare( "SELECT label, value FROM $COP_TABLE WHERE name = %s ", $name ), ARRAY_A );
 		$array = array();
 		foreach ( $list as $key => $name ) :
-			$array[] = $label ? ['label' => $name['label'], 'value' => $name['value'] : $name['value'];
+	
+			if ( $label ) :
+				$array[] = [ 'label' => $name['label'], 'value' => $name['value'] ];
+			else :
+				$array[] = $name['value'];
+			endif;
+	
 		endforeach;
 
 		return $array;
