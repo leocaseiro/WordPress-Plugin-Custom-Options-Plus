@@ -45,6 +45,11 @@ FAQ (Frequently Asked Questions)
 	foreach ($array as $name) :
 		echo $name;
 	endforeach;
+	
+	$array = get_customs('array_name', true);
+	foreach ($array as $name) :
+		echo $name['label'] . " - ". $name['value'];
+	endforeach;
 ?>
 ```
 
