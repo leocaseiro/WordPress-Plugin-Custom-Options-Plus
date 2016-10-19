@@ -5,7 +5,7 @@ Plugin URI: https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus
 Description: The easiest way to add your custom variables as a Settings Page for your Theme. Even with no expertise in PHP.
 You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
 You can also enter the login of your social networks. How to login twitter, Facebook, Youtube, contact email and more.
-Version: 1.7.1
+Version: 1.8.0
 Author: Leo Caseiro
 Author URI: http://leocaseiro.com.br/
 */
@@ -40,7 +40,7 @@ define( 'COP_PLUGIN_URL', WP_PLUGIN_URL . '/' . COP_PLUGIN_NAME );
 
 // Added on 1.5
 define( 'COP_OPTIONS_PREFIX', 'cop_' );
-define( 'COP_PLUGIN_VERSION', '1.7.0' );
+define( 'COP_PLUGIN_VERSION', '1.8.0' );
 
 global $wpdb, $COP_TABLE;
 define( 'COP_TABLE', $wpdb->prefix . 'custom_options_plus' );
@@ -98,14 +98,14 @@ function cop_insert( $row ) {
 	global $wpdb;
 
 	$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
-	$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
+	$row['name'] = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
 	$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
 
 	return $wpdb->insert(
 		COP_TABLE,
 		array(
 			'label' => $row['label'],
-			'name'  => $row['name'],
+			'name' => $row['name'],
 			'value' => stripslashes( $row['value'] )
 		),
 		array( '%s', '%s', '%s' )
@@ -116,9 +116,9 @@ function cop_insert( $row ) {
 function cop_update( $row ) {
 	global $wpdb;
 
-	$row['id']    = filter_var( $row['id'], FILTER_VALIDATE_INT );
+	$row['id'] = filter_var( $row['id'], FILTER_VALIDATE_INT );
 	$row['label'] = stripslashes_deep( filter_var( $row['label'], FILTER_SANITIZE_SPECIAL_CHARS ) );
-	$row['name']  = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
+	$row['name'] = stripslashes_deep( filter_var( $row['name'], FILTER_SANITIZE_SPECIAL_CHARS ) );
 	$row['value'] = stripslashes_deep( filter_var( $row['value'], FILTER_UNSAFE_RAW ) );
 
 
@@ -126,7 +126,7 @@ function cop_update( $row ) {
 		COP_TABLE,
 		array(
 			'label' => $row['label'],
-			'name'  => $row['name'],
+			'name' => $row['name'],
 			'value' => stripslashes( $row['value'] )
 		),
 		array( 'id' => $row['id'] ),
@@ -166,9 +166,9 @@ function custom_options_plus_adm() {
 	wp_enqueue_script( 'copFunctions', COP_PLUGIN_URL . '/js/functions.js', array( 'stringToSlug' ) );
 	wp_enqueue_script( 'cop-import-export', COP_PLUGIN_URL . '/js/import-export.js', array( 'jquery', ), null, true );
 
-	$id    = '';
+	$id = '';
 	$label = '';
-	$name  = '';
+	$name = '';
 	$value = '';
 
 	$message = '';
@@ -196,9 +196,9 @@ function custom_options_plus_adm() {
 
 		$option = cop_get_option( $_GET['id'] );
 
-		$id    = $option->id;
+		$id = $option->id;
 		$label = $option->label;
-		$name  = $option->name;
+		$name = $option->name;
 		$value = $option->value;
 
 	endif;
@@ -335,7 +335,11 @@ function custom_options_plus_adm() {
 }
 
 
-// Get your single option
+/**
+ * @param string $name
+ *
+ * @return bool|null|string
+ */
 function get_custom( $name ) {
 	global $wpdb, $COP_TABLE;
 
@@ -346,14 +350,25 @@ function get_custom( $name ) {
 	endif;
 }
 
-// Get your array options
-function get_customs( $name ) {
+/**
+ * @param $name
+ * @param bool $collection (optional)
+ *
+ * @return array(string|int, string|int...) or array('label' => string|int, 'value' => string|int);
+ */
+function get_customs( $name, $collection = false ) {
 	global $wpdb, $COP_TABLE;
 	if ( '' != $name ) :
-		$list  = $wpdb->get_results( $wpdb->prepare( "SELECT value FROM $COP_TABLE WHERE name = %s ", $name ), ARRAY_A );
+		$list = $wpdb->get_results( $wpdb->prepare( "SELECT label, value FROM $COP_TABLE WHERE name = %s ", $name ), ARRAY_A );
 		$array = array();
 		foreach ( $list as $key => $name ) :
-			$array[] = $name['value'];
+
+			if ( $collection ) :
+				$array[] = array( 'label' => $name['label'], 'value' => $name['value'] );
+			else :
+				$array[] = $name['value'];
+			endif;
+
 		endforeach;
 
 		return $array;
@@ -362,14 +377,13 @@ function get_customs( $name ) {
 	endif;
 }
 
-
 // Tutorial on Help Button
 function cop_plugin_help( $contextual_help, $screen_id, $screen ) {
 
 	global $my_plugin_hook;
 	if ( $screen_id == $my_plugin_hook ) {
 
-		$contextual_help = '<br>Use <br /><code>' . htmlentities( '<?php echo get_custom(\'yourkey\') ; ?>' ) . '</code><br /><br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'yourkey\') as $name ) : ' ) . '<br />    echo $name; <br /> ' . htmlentities( 'endforeach; ?>' ) . '</code> <br /> in your theme.';
+		$contextual_help = '<br>Use <br /><code>' . htmlentities( '<?php echo get_custom(\'yourkey\') ; ?>' ) . '</code><br /><br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'yourkey\') as $name ) : ' ) . '<br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'yourkey\', true) as $output ) : ' ) . '<br />    echo $output["name"] . " - " . $output["value"]; <br /> ' . htmlentities( 'endforeach; ?>' ) . '</code> <br /> in your theme.';
 	}
 
 	return $contextual_help;
@@ -381,7 +395,7 @@ add_filter( 'contextual_help', 'cop_plugin_help', 10, 3 );
 // Ajax Export Data (Added on 1.7)
 function cop_export_data() {
 	if ( ! wp_verify_nonce( $_REQUEST['security_cop_ajax_export'], 'cop_ajax_export_nonce' ) ) {
-		wp_send_json_error( array('message' => 'Access Denied!'));
+		wp_send_json_error( array( 'message' => 'Access Denied!' ) );
 	}
 
 	header( 'Content-type: application/json' );
@@ -397,7 +411,7 @@ function cop_import_data() {
 	global $wpdb, $COP_TABLE;
 
 	if ( ! wp_verify_nonce( $_POST['security_cop_ajax_import'], 'cop_ajax_import_nonce' ) ) {
-		wp_send_json_error(array('message' => 'Access Denied!'));
+		wp_send_json_error( array( 'message' => 'Access Denied!' ) );
 	}
 
 	$truncate_table = filter_var( $_POST['clear-table'], FILTER_VALIDATE_BOOLEAN );
@@ -410,14 +424,14 @@ function cop_import_data() {
 		$wpdb->query( "TRUNCATE TABLE $COP_TABLE" );
 	}
 
-	$file_obj     = $_FILES['cop_file_import'];
+	$file_obj = $_FILES['cop_file_import'];
 	$file_content = file_get_contents( $file_obj['tmp_name'] );
 
 	$file_data = json_decode( $file_content, true );
 
 	foreach ( $file_data as $row ) {
 		if ( ! isset( $row['label'] ) || ! isset( $row['name'] ) || ! isset( $row['value'] ) ) {
-			wp_send_json_error(array('message' => 'The JSON file is invalid'));
+			wp_send_json_error( array( 'message' => 'The JSON file is invalid' ) );
 		}
 		cop_insert( $row );
 	}

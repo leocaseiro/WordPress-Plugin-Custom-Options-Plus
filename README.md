@@ -41,9 +41,16 @@ FAQ (Frequently Asked Questions)
 **Used to multiples options**
 ```php
 <?php
+	// Default get_customs returns a list(array)
 	$array = get_customs('array_name');
-	foreach ($array as $name) :
+	foreach ( $array as $name ) :
 		echo $name;
+	endforeach;
+
+	// Second parameter set to true for get_customs returns a collection(array) with `label` and `value`
+	$array = get_customs('array_name', true);
+	foreach ( $array as $name ) :
+		echo $name['label'] . ' - '. $name['value'];
 	endforeach;
 ?>
 ```
@@ -51,6 +58,10 @@ FAQ (Frequently Asked Questions)
 
 Changelog
 --------------
+
+**1.8.0**
+
+* get_customs() returns a collection (optional). Thanks @kas-cor
 
 **1.7.1**
 
