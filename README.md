@@ -59,6 +59,10 @@ FAQ (Frequently Asked Questions)
 Changelog
 --------------
 
+**1.8.1**
+
+* minor fixes on help. Thanks @janrenn
+
 **1.8.0**
 
 * get_customs() returns a collection (optional). Thanks @kas-cor

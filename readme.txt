@@ -3,8 +3,8 @@ Contributors: leocaseiro
 Donate link: http://leocaseiro.com.br/contato/
 Tags: configs, custom, custom configs, custom options, custom options plus, custom settings, leocaseiro, options, settings, wp_options
 Requires at least: 2.7
-Tested up to: 4.6
-Stable tag: 1.8.0
+Tested up to: 4.7.2
+Stable tag: 1.8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,10 @@ This Plugin was Based on Custom Settings (Custom Configs) which has been removal
 
 
 == Changelog ==
+
+= 1.8.1 =
+* minor fixes on help. Thanks @janrenn
+
 = 1.8.0 =
 * get_customs() returns a collection (optional). Thanks @kas-cor
 

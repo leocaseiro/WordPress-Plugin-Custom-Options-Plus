@@ -5,12 +5,12 @@ Plugin URI: https://github.com/leocaseiro/Wordpress-Plugin-Custom-Options-Plus
 Description: The easiest way to add your custom variables as a Settings Page for your Theme. Even with no expertise in PHP.
 You can for example, register the address and phone numbers of your company to leave in the header of your site. So, if someday relocate, you do not need to change your theme. Just change administratively.
 You can also enter the login of your social networks. How to login twitter, Facebook, Youtube, contact email and more.
-Version: 1.8.0
+Version: 1.8.1
 Author: Leo Caseiro
 Author URI: http://leocaseiro.com.br/
 */
 
-/*  Copyright 2011-2016 Leo Caseiro (http://leocaseiro.com.br/)
+/*  Copyright 2011-2017 Leo Caseiro (http://leocaseiro.com.br/)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as
@@ -383,7 +383,7 @@ function cop_plugin_help( $contextual_help, $screen_id, $screen ) {
 	global $my_plugin_hook;
 	if ( $screen_id == $my_plugin_hook ) {
 
-		$contextual_help = '<br>Use <br /><code>' . htmlentities( '<?php echo get_custom(\'yourkey\') ; ?>' ) . '</code><br /><br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'yourkey\') as $name ) : ' ) . '<br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'yourkey\', true) as $output ) : ' ) . '<br />    echo $output["name"] . " - " . $output["value"]; <br /> ' . htmlentities( 'endforeach; ?>' ) . '</code> <br /> in your theme.';
+		$contextual_help = '<br>Use  in your theme:<br /><br /><code>' . htmlentities( '<?php echo get_custom(\'yourkey\') ; ?>' ) . '</code><br /><br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'yourkey\') as $name ) : ' ) . '</code><br /><br /> or <br><code>' . htmlentities( '<?php foreach ( get_customs(\'yourkey\', true) as $output ) : ' ) . '<br />    echo $output["label"] . " - " . $output["value"]; <br /> ' . htmlentities( 'endforeach; ?>' ) . '</code> <br /><br /><br />';
 	}
 
 	return $contextual_help;
